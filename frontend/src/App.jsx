@@ -22,7 +22,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground antialiased">
+    <div className="min-h-screen text-foreground antialiased">
       <Navbar onNavigate={setCurrentPage} />
       <main className="container mx-auto px-4 py-6">
         {renderPage()}

@@ -1,0 +1,255 @@
+/* ============================================
+   Vanguard 3D - Design Tokens
+   Modern-Futuristic Aesthetic
+   ============================================ */
+
+/* Global tokens (variables) – placed on :root */
+:root {
+  /* Typography */
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Space Mono', 'SF Mono', 'Fira Code', 'Consolas', monospace;
+
+  /* Font scale (in rem) – tokens */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+
+  /* Font weights */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+
+  /* Line heights */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+
+  /* Letter spacing */
+  --tracking-tighter: -0.05em;
+  --tracking-tight: -0.025em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.025em;
+  --tracking-wider: 0.05em;
+  --tracking-widest: 0.1em;
+
+  /* Color Palette - Deep Neutrals */
+  --color-void: 240 20% 2%;      /* Deepest: #05080a */
+  --color-obsidian: 260 10% 5%;   /* Deep base: #0a0a10 */
+  --color-slate: 215 15% 8%;      /* Surface base: #14141c */
+  --color-stone: 220 10% 12%;     /* Elevated surface: #1c1c24 */
+  --color-graphite: 200 8% 15%;   /* Card surface: #262630 */
+  --color-pearl: 210 6% 20%;      /* Muted surface: #363644 */
+
+  /* Foreground / base text */
+  --color-mist: 210 5% 92%;      /* Primary text: #e8e8ef */
+  --color-ash: 210 5% 75%;       /* Secondary text: #c5c5d1 */
+  --color-wisp: 210 5% 55%;      /* Tertiary text: #8c8c9e */
+
+  /* Brand Colors */
+  --brand-cyan-default: 185 100% 55%;     /* Cyan glow: #00f7ff */
+  --brand-cyan-dim: 185 100% 45%;          /* Dimmed cyan: #00d4d4 */
+  --brand-violet-default: 260 100% 75%;    /* Electric violet: #c44dff */
+  --brand-violet-dim: 260 100% 65%;        /* Dimmed violet: #a840e6 */
+  --brand-emerald-default: 150 100% 50%;   /* Neon emerald: #00ffa3 */
+  --brand-emerald-dim: 150 100% 40%;       /* Dimmed emerald: #00cc82 */
+  --brand-amber-default: 35 100% 65%;      /* Amber: #ffb020 */
+  --brand-amber-dim: 35 100% 55%;          /* Dimmed amber: #e09e1a */
+
+  /* Status colors (accessible) */
+  --status-success-bg: 150 100% 15%;
+  --status-success-text: 150 100% 75%;
+  --status-warning-bg: 35 100% 20%;
+  --status-warning-text: 35 100% 65%;
+  --status-error-bg: 0 100% 25%;
+  --status-error-text: 0 100% 65%;
+  --status-info-bg: 210 100% 20%;
+  --status-info-text: 210 100% 75%;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.5), inset 0 1px 0 rgb(255 255 255 / 0.03);
+  --shadow-sm: 0 2px 4px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.04);
+  --shadow-md: 0 4px 8px rgb(0 0 0 / 0.7), inset 0 1px 0 rgb(255 255 255 / 0.05);
+  --shadow-lg: 0 8px 16px rgb(0 0 0 / 0.8), inset 0 1px 0 rgb(255 255 255 / 0.06);
+  --shadow-xl: 0 16px 32px rgb(0 0 0 / 0.9), inset 0 1px 0 rgb(255 255 255 / 0.07);
+  --shadow-inner: inset 0 2px 4px rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.03);
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: 12px;
+  --glass-highlight: rgba(255, 255, 255, 0.06);
+
+  /* Transitions */
+  --ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --ease-in: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+  --ease-in-out: cubic-bezier(0.645, 0.045, 0.355, 1);
+  --transition-fast: 150ms;
+  --transition-base: 200ms;
+  --transition-slow: 300ms;
+
+  /* Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
+  --radius-full: 9999px;
+}
+
+[data-theme='light'] {
+  /* Light theme tokens – optional (future) */
+  --color-void: 0 0% 100%;
+}
+
+/* Base layer – global defaults and typography */
+@layer base {
+  html {
+    font-family: var(--font-primary);
+    font-size: var(--text-base);
+    line-height: var(--leading-normal);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-primary);
+    background-color: hsl(var(--color-obsidian));
+    color: hsl(var(--color-mist));
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, hsla(185 100% 35% / 0.08), transparent 50%),
+      radial-gradient(ellipse 60% 40% at 100% 100%, hsla(260 100% 45% / 0.06), transparent 50%);
+    background-attachment: fixed;
+    background-size: 100% 100%;
+    min-height: 100vh;
+  }
+
+  /* Selection styling */
+  ::selection {
+    background: hsl(var(--brand-cyan-dim));
+    color: hsl(var(--color-void));
+  }
+
+  /* Focus visible styling for accessibility */
+  :focus-visible {
+    outline: 2px solid hsl(var(--brand-cyan-default));
+    outline-offset: 2px;
+  }
+}
+
+/* Utilities layer – new design system classes */
+@layer utilities {
+  /* Glassmorphism utilities */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-sm), inset 0 1px 0 var(--glass-highlight);
+  }
+
+  .glass-sm {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .glass-lg {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* Text with gradient - optional */
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(var(--brand-cyan-dim)), hsl(var(--brand-violet-dim)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Glow effects */
+  .glow {
+    box-shadow: 0 0 12px hsl(var(--brand-cyan-dim) / 0.4);
+  }
+  .glow-sm {
+    box-shadow: 0 0 8px hsl(var(--brand-cyan-dim) / 0.3);
+  }
+  .glow-lg {
+    box-shadow: 0 0 20px hsl(var(--brand-cyan-dim) / 0.5);
+  }
+
+  /* Elevation levels */
+  .elevation-1 { box-shadow: var(--shadow-xs); }
+  .elevation-2 { box-shadow: var(--shadow-sm); }
+  .elevation-3 { box-shadow: var(--shadow-md); }
+  .elevation-4 { box-shadow: var(--shadow-lg); }
+  .elevation-5 { box-shadow: var(--shadow-xl); }
+
+  .elevation-glass {
+    box-shadow: var(--shadow-sm), inset 0 1px 0 var(--glass-highlight);
+  }
+
+  /* Transitions */
+  .transition-fast { transition: all var(--transition-fast) var(--ease-out); }
+  .transition-base { transition: all var(--transition-base) var(--ease-out); }
+  .transition-slow { transition: all var(--transition-slow) var(--ease-out); }
+
+  /* Hover lift – common micro-interaction */
+  .hover-lift:hover {
+    transform: translateY(-2px);
+  }
+  .hover-lift:active {
+    transform: translateY(0);
+  }
+}
+
+/* Components layer – extended UI components */
+@layer components {
+  /* Refined status badges */
+  .badge-elegant {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-full);
+    border: 1px solid transparent;
+    padding: 0.25rem 0.75rem;
+    font-size: var(--text-xs);
+    font-weight: var(--font-medium);
+    letter-spacing: var(--tracking-wide);
+    transition: all var(--transition-base) var(--ease-out);
+  }
+  .badge-elegant-success {
+    background-color: hsl(var(--status-success-bg) / 0.15);
+    color: hsl(var(--status-success-text));
+    border-color: hsl(var(--status-success-text) / 0.2);
+  }
+  .badge-elegant-warning {
+    background-color: hsl(var(--status-warning-bg) / 0.15);
+    color: hsl(var(--status-warning-text));
+    border-color: hsl(var(--status-warning-text) / 0.2);
+  }
+  .badge-elegant-error {
+    background-color: hsl(var(--status-error-bg) / 0.15);
+    color: hsl(var(--status-error-text));
+    border-color: hsl(var(--status-error-text) / 0.2);
+  }
+  .badge-elegant-info {
+    background-color: hsl(var(--status-info-bg) / 0.15);
+    color: hsl(var(--status-info-text));
+    border-color: hsl(var(--status-info-text) / 0.2);
+  }
+}

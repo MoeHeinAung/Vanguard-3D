@@ -58,7 +58,7 @@ function MasterDealersPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Master Dealer Management</h1>
+          <h1 className="text-4xl font-bold tracking-tight mb-2 text-gradient">Master Dealer Management</h1>
           <p className="text-muted-foreground mt-1">Manage entities for risk offloading and hold management.</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) setIsEdit(false); }}>
@@ -92,7 +92,11 @@ function MasterDealersPage() {
                 <button
                   key={dealer.id}
                   onClick={() => setSelectedDealer(dealer)}
-                  className={`w-full text-left p-4 border-b border-border hover:bg-accent/50 ${selectedDealer?.id === dealer.id ? 'bg-accent border-l-2 border-l-primary' : ''}`}
+                  className={`w-full text-left p-4 border-b border-border transition-colors duration-200 ${
+                    selectedDealer?.id === dealer.id
+                      ? 'bg-accent/10 border-l-2 border-l-primary ring-1 ring-primary/10'
+                      : 'hover:bg-accent/10'
+                  }`}
                 >
                   <p className="font-medium">{dealer.name}</p>
                   <p className="text-sm text-muted-foreground">{dealer.id}</p>

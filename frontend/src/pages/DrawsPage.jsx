@@ -53,7 +53,7 @@ function DrawsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">
+          <h1 className="text-4xl font-bold tracking-tight mb-2 text-gradient">
             {selectedDraw ? `Draw Details: ${selectedDraw.draw_date}` : 'Draw Management'}
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -90,8 +90,10 @@ function DrawsPage() {
                 <button
                   key={draw.id}
                   onClick={() => setSelectedDraw(draw)}
-                  className={`w-full text-left p-4 border-b border-border hover:bg-accent/50 transition-colors ${
-                    selectedDraw?.id === draw.id ? 'bg-accent border-l-2 border-l-primary' : ''
+                  className={`w-full text-left p-4 border-b border-border transition-colors duration-200 ${
+                    selectedDraw?.id === draw.id
+                      ? 'bg-accent/10 border-l-2 border-l-primary ring-1 ring-primary/10'
+                      : 'hover:bg-accent/10'
                   }`}
                 >
                   <div className="flex justify-between items-start">

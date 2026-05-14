@@ -1,35 +1,189 @@
+@import url('./styles/tokens.css');
+
+/* Tailwind layers */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Futuristic Dark Theme */
-:root {
-  --background: 7 0% 7%;
-  --foreground: 0 0% 98%;
-  --card: 0 0% 12%;
-  --card-foreground: 0 0% 98%;
-  --popover: 0 0% 12%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 210 100% 70%;
-  --primary-foreground: 0 0% 7%;
-  --secondary: 340 100% 75%;
-  --secondary-foreground: 0 0% 7%;
-  --muted: 0 0% 15%;
-  --muted-foreground: 0 0% 60%;
-  --accent: 210 100% 50%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 210 100% 20%;
-  --input: 0 0% 20%;
-  --ring: 210 100% 70%;
-  --radius: 0.5rem;
+/* ============================================
+   Legacy Shadcn -> Modern Token Mapping
+   ============================================ */
+@layer base {
+  :root {
+    /* Background & Surface */
+    --background: 260 10% 5%;       /* deep void */
+    --foreground: 210 5% 92%;       /* mist */
+    --card: 200 8% 15%;             /* graphite */
+    --card-foreground: 210 5% 92%;
+    --popover: 215 15% 10%;         /* darker slate */
+    --popover-foreground: 210 5% 92%;
+
+    /* Brand Colors */
+    --primary: 185 100% 55%;        /* cyan */
+    --primary-foreground: 260 10% 5%;
+    --secondary: 260 100% 75%;      /* violet */
+    --secondary-foreground: 260 10% 5%;
+    --muted: 215 15% 8%;            /* slate */
+    --muted-foreground: 210 5% 55%; /* wisp */
+    --accent: 185 100% 35%;         /* dim cyan hover */
+    --accent-foreground: 210 5% 92%;
+
+    /* Status */
+    --destructive: 0 100% 60%;      /* red */
+    --destructive-foreground: 210 5% 92%;
+
+    /* UI Elements */
+    --border: 210 10% 20%;          /* subtle gray-blue */
+    --input: 210 10% 10%;           /* darker input bg */
+    --ring: 185 100% 55%;           /* cyan glow */
+    --radius: var(--radius-md);
+  }
 }
 
-body {
-  background-color: hsl(var(--background));
-  color: hsl(var(--foreground));
-  background-image: 
-    radial-gradient(ellipse at top, rgba(144, 202, 249, 0.05) 0%, transparent 50%),
-    radial-gradient(ellipse at bottom, rgba(244, 143, 177, 0.03) 0%, transparent 50%);
+/* ============================================
+   Custom Base Overrides & Typography
+   ============================================ */
+@layer base {
+  html {
+    font-family: var(--font-primary), system-ui, sans-serif;
+    font-feature-settings: "kern" 1, "liga" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: hsl(var(--color-obsidian));
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -20%, hsla(185 100% 35% / 0.08), transparent 50%),
+      radial-gradient(ellipse 60% 40% at 100% 100%, hsla(260 100% 45% / 0.06), transparent 50%);
+    background-attachment: fixed;
+    background-size: cover;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background: hsl(var(--brand-cyan-dim));
+    color: hsl(var(--color-void));
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--brand-cyan-default));
+    outline-offset: 2px;
+  }
+}
+
+/* ============================================
+   Component Styling – Modern-Futuristic
+   ============================================ */
+@layer components {
+  /* Glassmorphism navbar */
+  .glass-navbar {
+    @apply sticky top-0 z-50 border-b backdrop-blur-md;
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  /* Glass cards */
+  .glass-card {
+    @apply rounded-xl border bg-card/50 shadow-sm backdrop-blur-sm transition-all duration-200;
+    border-color: rgba(255,255,255,0.06);
+    background: linear-gradient(160deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+    box-shadow: var(--shadow-md), inset 0 1px 0 var(--glass-highlight);
+  }
+
+  .glass-card:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: var(--shadow-lg), inset 0 1px 0 var(--glass-highlight);
+  }
+
+  /* Primary gradient button */
+  .btn-primary-gradient {
+    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-200;
+    background: linear-gradient(90deg, hsl(var(--brand-cyan-default)) 0%, hsl(var(--brand-violet-default)) 100%);
+    color: hsl(var(--color-void));
+    box-shadow:
+      0 4px 12px rgba(0, 247, 255, 0.25),
+      0 1px 0 rgba(255,255,255,0.1) inset;
+  }
+
+  .btn-primary-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 6px 16px rgba(0, 247, 255, 0.35),
+      0 1px 0 rgba(255,255,255,0.1) inset;
+  }
+
+  .btn-primary-gradient:active {
+    transform: translateY(0);
+  }
+
+  /* Glow accent for active elements */
+  .glow-accent {
+    box-shadow: 0 0 12px hsl(var(--brand-cyan-default) / 0.3);
+  }
+
+  /* Refined status badges */
+  .badge-elegant {
+    @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors;
+    border-color: transparent;
+    background-color: hsl(var(--status-info-bg) / 0.15);
+    color: hsl(var(--muted-foreground));
+  }
+
+  .badge-elegant-success {
+    background-color: hsl(var(--status-success-bg) / 0.15);
+    color: hsl(var(--status-success-text));
+    border-color: hsl(var(--status-success-text) / 0.2);
+  }
+
+  .badge-elegant-warning {
+    background-color: hsl(var(--status-warning-bg) / 0.15);
+    color: hsl(var(--status-warning-text));
+    border-color: hsl(var(--status-warning-text) / 0.2);
+  }
+
+  .badge-elegant-error {
+    background-color: hsl(var(--status-error-bg) / 0.15);
+    color: hsl(var(--status-error-text));
+    border-color: hsl(var(--status-error-text) / 0.2);
+  }
+
+  .badge-elegant-info {
+    background-color: hsl(var(--status-info-bg) / 0.15);
+    color: hsl(var(--status-info-text));
+    border-color: hsl(var(--status-info-text) / 0.2);
+  }
+}
+
+/* ============================================
+   Utility Extensions
+   ============================================ */
+@layer utilities {
+  .elevation-1 { box-shadow: var(--shadow-xs); }
+  .elevation-2 { box-shadow: var(--shadow-sm); }
+  .elevation-3 { box-shadow: var(--shadow-md); }
+  .elevation-4 { box-shadow: var(--shadow-lg); }
+  .elevation-5 { box-shadow: var(--shadow-xl); }
+
+  .transition-fast { transition: all var(--transition-fast) var(--ease-out); }
+  .transition-base { transition: all var(--transition-base) var(--ease-out); }
+  .transition-slow { transition: all var(--transition-slow) var(--ease-out); }
+
+  .hover-lift:hover { @apply -translate-y-0.5; }
+  .hover-lift:active { @apply translate-y-0; }
+
+  .text-gradient {
+    background: linear-gradient(135deg, hsl(var(--brand-cyan-dim)), hsl(var(--brand-violet-dim)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .ring-gradient {
+    box-shadow: 0 0 0 2px hsl(var(--brand-cyan-dim));
+  }
 }

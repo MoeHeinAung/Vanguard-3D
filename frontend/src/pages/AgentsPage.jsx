@@ -58,7 +58,7 @@ function AgentsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Agent Management</h1>
+          <h1 className="text-4xl font-bold tracking-tight mb-2 text-gradient">Agent Management</h1>
           <p className="text-muted-foreground mt-1">Manage lottery agents, commissions, and factors.</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={(open) => { setIsDialogOpen(open); if (!open) setIsEdit(false); }}>
@@ -89,7 +89,11 @@ function AgentsPage() {
                 <button
                   key={agent.id}
                   onClick={() => setSelectedAgent(agent)}
-                  className={`w-full text-left p-4 border-b border-border hover:bg-accent/50 ${selectedAgent?.id === agent.id ? 'bg-accent border-l-2 border-l-primary' : ''}`}
+                  className={`w-full text-left p-4 border-b border-border transition-colors duration-200 ${
+                    selectedAgent?.id === agent.id
+                      ? 'bg-accent/10 border-l-2 border-l-primary ring-1 ring-primary/10'
+                      : 'hover:bg-accent/10'
+                  }`}
                 >
                   <p className="font-medium">{agent.name}</p>
                   <p className="text-sm text-muted-foreground">{agent.id}</p>
