@@ -1,7 +1,11 @@
 import webview
 import os
+from backend.database.manager import DatabaseManager
 
 class API:
+    def __init__(self):
+        self.db = DatabaseManager()
+
     def hello(self):
         return "Hello from Python!"
 
