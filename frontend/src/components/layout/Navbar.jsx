@@ -12,6 +12,9 @@ function Navbar({ onNavigate }) {
             <Button variant="ghost" onClick={() => onNavigate('draws')}>
               Draws
             </Button>
+            <Button variant="ghost" onClick={() => onNavigate('agents')}>
+              Agents
+            </Button>
             <Button variant="ghost" onClick={() => onNavigate('home')}>
               Dashboard
             </Button>

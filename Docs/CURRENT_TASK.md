@@ -1,8 +1,8 @@
 # Task ID
-TASK-001
+TASK-002
 ---
 # Title
-Draw Management UI Implementation
+Agent Management CRUD Implementation
 ---
 # Status
 COMPLETED
@@ -14,111 +14,45 @@ HIGH
 Feature
 ---
 # Goal
-Implement a complete UI for managing lottery draws, including creation, listing, and lifecycle status management.
+Implement agent management functionality, including database schema update, backend service logic, and a dedicated UI for CRUD operations.
 ---
 # Scope
 ## Included
-- Backend domain structure (api, database, models, services)
-- `pywebview` bridge setup
-- `DrawService` with status lifecycle logic
-- Frontend Master-Detail layout for Draws
-- Shadcn/UI integration with Tailwind CSS
-- Draw creation dialog with validation
+- Add `agents` table to SQLite schema.
+- Implement `AgentService` in `backend/services/agent_service.py`.
+- Expose agent methods to Python API in `main.py`.
+- Implement `AgentsPage.jsx` using Master-Detail pattern.
+- Update `Navbar` to include "Agents" link.
 ## Excluded
-- Ticket sales management
-- Agent management
-- Reports/Analytics
----
-# Business Value
-Provides the foundational interface for managing the core entity of the system: lottery draws.
----
-# Related Features
-- Database Management
-- Python/React Bridge
----
-# Dependencies
-- SQLite database initialization
-- `pywebview` library installation
-- Shadcn/UI and Tailwind CSS configuration
----
-# Relevant Knowledge
-## Rules
-- SSOT.md
-## ADRs
-- ADR-001-environment-setup-and-bridge.md
-- ADR-002-draw-management-ui-spec.md
----
-# Architectural Constraints
-- Must use `pywebview` for the bridge.
-- Must use `shadcn/ui` and `Tailwind CSS` as per SSOT.md.
-- Must keep business logic in Python services.
----
-# Assumptions
-- Application runs in a desktop environment via `pywebview`.
-- SQLite is available for local storage.
----
-# Risks
-- Bridge initialization race conditions.
-- UI framework mismatch (corrected from MUI to Shadcn).
----
-# Edge Cases
-- Empty draw list.
-- Creating draws in the past (handled by `update_statuses`).
-- Settling already settled draws.
+- Ticket sales logic.
+- Agent authentication.
 ---
 # Implementation Plan
 ## Step 1
 Description:
-Scaffold backend and initialize database.
-Expected Output:
-`vanguard.db` exists with `draws` table.
-Validation:
-- [x] Database manager creates table.
+Update `DatabaseManager` to include `agents` table.
 ---
 ## Step 2
 Description:
-Setup `pywebview` bridge.
-Expected Output:
-Python methods callable from JS.
-Validation:
-- [x] `callPython('hello')` works.
+Implement `AgentService` with `get_agents`, `create_agent`, `update_agent`, and `delete_agent`.
 ---
 ## Step 3
 Description:
-Implement Draw Management UI.
-Expected Output:
-Functional Draws page with Sidebar and Details.
-Validation:
-- [x] Draws can be created.
-- [x] Draw history is visible.
-- [x] Status updates work correctly.
+Expose new service methods via `API` class in `main.py`.
+---
+## Step 4
+Description:
+Create `AgentsPage.jsx` and add to `App.jsx`.
 ---
 # Files Expected To Change
-- main.py
 - backend/database/manager.py
-- backend/services/draw_service.py
-- frontend/src/utils/bridge.js
-- frontend/src/pages/DrawsPage.jsx
+- backend/services/agent_service.py
+- main.py
+- frontend/src/pages/AgentsPage.jsx
 - frontend/src/App.jsx
----
-# Testing Strategy
-## Manual Testing
-- Create new draws with various dates.
-- Switch between draws in the sidebar.
-- Verify status badges reflect the correct state.
+- frontend/src/components/layout/Navbar.jsx
 ---
 # Acceptance Criteria
-- [x] Backend follows the domain structure.
-- [x] Bridge communication is stable.
-- [x] UI uses Shadcn and Tailwind.
-- [x] Master-Detail layout is responsive and intuitive.
----
-# Anti-Patterns
-- Using Material UI (MUI) instead of Shadcn/Tailwind.
-- Implementing business logic in the React layer.
----
-# Rollback Plan
-- Revert to initial scaffold if bridge fails.
----
-# Completion Notes
-Implementation completed using Shadcn/UI and Tailwind CSS. The bridge is stable using a promise-based utility. All business logic for draws is centralized in the `DrawService`.
+- Agents can be created, viewed, edited, and deleted.
+- UI uses Master-Detail pattern.
+- Database schema correctly handles all agent fields.
