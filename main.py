@@ -3,12 +3,14 @@ import os
 from backend.database.manager import DatabaseManager
 from backend.services.draw_service import DrawService
 from backend.services.agent_service import AgentService
+from backend.services.master_dealer_service import MasterDealerService
 
 class API:
     def __init__(self):
         self.db = DatabaseManager()
         self.draw_service = DrawService(self.db)
         self.agent_service = AgentService(self.db)
+        self.md_service = MasterDealerService(self.db)
 
     # Draws
     def hello(self):
@@ -47,6 +49,25 @@ class API:
     def delete_agent(self, agent_id):
         return self.agent_service.delete_agent(agent_id)
 
+    # Master Dealers
+    def get_master_dealers(self):
+        return self.md_service.get_all_master_dealers()
+
+    def create_master_dealer(self, data):
+        return self.md_service.create_master_dealer(
+            data['id'], data['name'], data['commission'], 
+            data['jp_factor'], data['sp_factor'], data.get('notes')
+        )
+
+    def update_master_dealer(self, data):
+        return self.md_service.update_master_dealer(
+            data['id'], data['name'], data['commission'], 
+            data['jp_factor'], data['sp_factor'], data.get('notes')
+        )
+
+    def delete_master_dealer(self, md_id):
+        return self.md_service.delete_master_dealer(md_id)
+
 def main():
     api = API()
     # In development, we load the Vite dev server
@@ -56,7 +77,7 @@ def main():
         'http://localhost:5173',
         js_api=api
     )
-    webview.start()
+    webview.start(debug=True)
 
 if __name__ == '__main__':
     main()

@@ -35,4 +35,15 @@ class DatabaseManager:
                     created_at TEXT DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS master_dealers (
+                    id TEXT PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    commission REAL NOT NULL,
+                    jp_factor REAL NOT NULL,
+                    sp_factor REAL NOT NULL,
+                    notes TEXT,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                )
+            ''')
             conn.commit()

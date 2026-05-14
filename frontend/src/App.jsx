@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import DrawsPage from './pages/DrawsPage'
 import AgentsPage from './pages/AgentsPage'
+import MasterDealersPage from './pages/MasterDealersPage'
 import Navbar from './components/layout/Navbar'
 
 function App() {
@@ -10,6 +11,7 @@ function App() {
     switch (currentPage) {
       case 'draws': return <DrawsPage />
       case 'agents': return <AgentsPage />
+      case 'master-dealers': return <MasterDealersPage />
       default: return (
         <div className="text-center py-12">
           <h1 className="text-4xl font-bold text-primary mb-4">Vanguard 3D</h1>
