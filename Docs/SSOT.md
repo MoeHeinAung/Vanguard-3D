@@ -25,9 +25,36 @@ Vanguard 3D is a lottery ticket management system for dealers and agents to hand
 ## Tech Stack
 
 Backend - Python
-Frontend - React JSX (not TSX) + MUI
+Frontend - React JSX (not TSX) + shadcn/ui + Tailwind CSS
 Database - Sqlite3
 Bridge - pywebview
+
+---
+
+## UI Design System
+
+### Framework
+- **shadcn/ui** - Modern component library built on Radix UI primitives
+- **Tailwind CSS** - Utility-first CSS framework
+- **Heroicons/Lucide** - Icon library
+
+### Theme
+- Dark mode by default with futuristic aesthetic
+- CSS variables for consistent theming
+- Glassmorphism effects via backdrop-filter
+- Radial gradient background for depth
+
+### Component Structure
+```
+src/components/ui/      # shadcn primitive components
+  ├── button.jsx
+  ├── card.jsx
+  ├── dialog.jsx
+  ├── input.jsx
+  ├── label.jsx
+  ├── badge.jsx
+  └── textarea.jsx
+```
 
 ---
 

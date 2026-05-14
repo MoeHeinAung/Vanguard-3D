@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Futuristic Dark Theme */
+:root {
+  --background: 7 0% 7%;
+  --foreground: 0 0% 98%;
+  --card: 0 0% 12%;
+  --card-foreground: 0 0% 98%;
+  --popover: 0 0% 12%;
+  --popover-foreground: 0 0% 98%;
+  --primary: 210 100% 70%;
+  --primary-foreground: 0 0% 7%;
+  --secondary: 340 100% 75%;
+  --secondary-foreground: 0 0% 7%;
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 60%;
+  --accent: 210 100% 50%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 210 100% 20%;
+  --input: 0 0% 20%;
+  --ring: 210 100% 70%;
+  --radius: 0.5rem;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  background-image: 
+    radial-gradient(ellipse at top, rgba(144, 202, 249, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom, rgba(244, 143, 177, 0.03) 0%, transparent 50%);
+}
