@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import DrawsPage from './pages/DrawsPage'
+import SalesPage from './pages/SalesPage'
 import AgentsPage from './pages/AgentsPage'
 import MasterDealersPage from './pages/MasterDealersPage'
 import Navbar from './components/layout/Navbar'
@@ -10,6 +11,7 @@ function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'draws': return <DrawsPage />
+      case 'sales': return <SalesPage />
       case 'agents': return <AgentsPage />
       case 'master-dealers': return <MasterDealersPage />
       default: return (

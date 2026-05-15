@@ -46,4 +46,17 @@ class DatabaseManager:
                     created_at TEXT DEFAULT CURRENT_TIMESTAMP
                 )
             ''')
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS sales (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    draw_id INTEGER NOT NULL,
+                    agent_id TEXT NOT NULL,
+                    ticket TEXT NOT NULL,
+                    amount REAL NOT NULL,
+                    notes TEXT,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (draw_id) REFERENCES draws (id),
+                    FOREIGN KEY (agent_id) REFERENCES agents (id)
+                )
+            ''')
             conn.commit()

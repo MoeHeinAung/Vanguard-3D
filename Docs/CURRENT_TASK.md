@@ -1,8 +1,8 @@
 # Task ID
-TASK-003
+TASK-004
 ---
 # Title
-Master Dealer CRUD Implementation
+Sale CRUD Implementation
 ---
 # Status
 COMPLETED
@@ -14,44 +14,44 @@ HIGH
 Feature
 ---
 # Goal
-Implement Master Dealer management functionality to support risk offloading, including database schema update, backend service logic, and a dedicated UI for CRUD operations.
+Implement Sale management to allow agents to record ticket sales for specific draws. This includes a custom parser for multi-line inputs, database schema definition with relations, and a two-column Master-Detail UI.
 ---
 # Scope
 ## Included
-- Add `master_dealers` table to SQLite schema.
-- Implement `MasterDealerService` in `backend/services/master_dealer_service.py`.
-- Expose master dealer methods to Python API in `main.py`.
-- Implement `MasterDealersPage.jsx` using Master-Detail pattern.
-- Update `Navbar` to include "Master Dealers" link.
+- Add `sales` table to `vanguard.db` with foreign keys to `draws` and `agents`.
+- Implement `SaleService` with batch creation capabilities.
+- Custom logic to parse "TICKET = AMOUNT" input format.
+- Two-column form: Left (Draw selection, Agent selection), Right (Multi-line input).
 ## Excluded
-- Risk offloading/hold amount calculation logic (future task).
+- Complex risk offloading (separate task).
+- Ticket sales reporting/analytics.
 ---
 # Implementation Plan
 ## Step 1
 Description:
-Update `DatabaseManager` to include `master_dealers` table.
----
+Update `DatabaseManager` to define `sales` table with foreign key constraints.
 ## Step 2
 Description:
-Implement `MasterDealerService` with `get_master_dealers`, `create_master_dealer`, `update_master_dealer`, and `delete_master_dealer`.
----
+Implement `SaleService` in `backend/services/sale_service.py` with bulk insertion logic and grouping by `created_at`.
 ## Step 3
 Description:
-Expose new service methods via `API` class in `main.py`.
----
+Expose `create_sales` and `get_sales` methods in `main.py`.
 ## Step 4
 Description:
-Create `MasterDealersPage.jsx` and add to `App.jsx`.
+Implement `SalesPage.jsx` with the requested two-column layout and input parser.
+## Step 5
+Description:
+Register `SalesPage` in `App.jsx` and `Navbar`.
 ---
 # Files Expected To Change
 - backend/database/manager.py
-- backend/services/master_dealer_service.py
+- backend/services/sale_service.py
 - main.py
-- frontend/src/pages/MasterDealersPage.jsx
+- frontend/src/pages/SalesPage.jsx
 - frontend/src/App.jsx
 - frontend/src/components/layout/Navbar.jsx
 ---
-# Acceptance Criteria
-- Master Dealers can be created, viewed, edited, and deleted.
-- UI uses Master-Detail pattern.
-- Database schema correctly handles all fields.
+# Validation Strategy
+- Verify bulk ticket parsing correctly handles valid/invalid formats.
+- Verify foreign key integrity (Draw/Agent).
+- Ensure entries are grouped correctly by `created_at` timestamp.
