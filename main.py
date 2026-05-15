@@ -7,6 +7,7 @@ from backend.services.agent_service import AgentService
 from backend.services.master_dealer_service import MasterDealerService
 from backend.services.sale_service import SaleService
 from backend.services.offload_service import OffloadService
+from backend.services.settings_service import SettingsService
 
 class API:
     def __init__(self):
@@ -16,11 +17,27 @@ class API:
         self.md_service = MasterDealerService(self.db)
         self.sale_service = SaleService(self.db)
         self.offload_service = OffloadService(self.db)
+        self.settings_service = SettingsService(self.db)
 
-    # Draws
     def hello(self):
         return "Hello from Python!"
 
+    # Settings
+    def get_setting(self, key, default=None):
+        try:
+            return self.settings_service.get_setting(key, default)
+        except Exception as e:
+            print(f"Error in get_setting: {e}", file=sys.stderr)
+            raise e
+
+    def update_setting(self, key, value):
+        try:
+            return self.settings_service.update_setting(key, value)
+        except Exception as e:
+            print(f"Error in update_setting: {e}", file=sys.stderr)
+            raise e
+
+    # Draws
     def get_draws(self):
         try:
             self.draw_service.update_statuses()

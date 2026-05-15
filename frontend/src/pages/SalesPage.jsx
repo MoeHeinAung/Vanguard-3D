@@ -14,8 +14,9 @@ const SalesPage = () => {
   const [sales, setSales] = useState([]);
   const [draws, setDraws] = useState([]);
   const [selectedDraw, setSelectedDraw] = useState(null);
-  const [adminHold, setAdminHold] = useState(5000); // Default house hold
+  const [adminHold, setAdminHold] = useState(5000);
   const [selectedAgent, setSelectedAgent] = useState(null);
+  const [agentFilter, setAgentFilter] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -28,47 +29,59 @@ const SalesPage = () => {
   const itemsPerPage = 20;
 
   const fetchData = async () => {
-    const drawsData = await callPython('get_draws');
-    const agentsData = await callPython('get_agents');
-    const salesData = await callPython('get_sales');
-    const openDraw = drawsData.find(d => d.status === 'Open');
-    setDraws(drawsData.filter(d => d.status === 'Open'));
-    setAgents(agentsData);
-    setSelectedDraw(openDraw);
-    setSales(salesData.filter(s => s.draw_id === openDraw?.id));
+    try {
+      const drawsData = await callPython('get_draws');
+      const agentsData = await callPython('get_agents');
+      const salesData = await callPython('get_sales');
+      const hold = await callPython('get_setting', 'admin_hold', '5000');
+      
+      const openDraw = drawsData.find(d => d.status === 'Open');
+      setDraws(drawsData.filter(d => d.status === 'Open'));
+      setAgents(agentsData);
+      setSelectedDraw(openDraw);
+      setSales(salesData.filter(s => s.draw_id === openDraw?.id));
+      setAdminHold(Number(hold));
+    } catch (error) {
+      console.error('Fetch error:', error);
+    }
   };
 
   useEffect(() => { fetchData(); }, []);
 
+  const handleHoldChange = async (val) => {
+    const newVal = Number(val);
+    setAdminHold(newVal);
+    await callPython('update_setting', 'admin_hold', newVal);
+  };
+
+  const filteredSales = useMemo(() => {
+    if (!agentFilter) return sales;
+    return sales.filter(s => s.agent_id === agentFilter.id);
+  }, [sales, agentFilter]);
+
+  const agentSummary = useMemo(() => {
+    if (!agentFilter) return null;
+    const total = filteredSales.reduce((sum, s) => sum + s.amount, 0);
+    const uniqueTickets = new Set(filteredSales.map(s => s.ticket)).size;
+    const commission = (total * (agentFilter.commission || 0)) / 100;
+    return { total, uniqueTickets, commission };
+  }, [filteredSales, agentFilter]);
+
   const ticketAggregates = useMemo(() => {
     const summary = {};
-    sales.forEach(s => {
-      if (!summary[s.ticket]) {
-        summary[s.ticket] = { total: 0, taken: 0, pending: 0, offloaded: 0 };
-      }
+    filteredSales.forEach(s => {
+      if (!summary[s.ticket]) summary[s.ticket] = { total: 0 };
       summary[s.ticket].total += s.amount;
     });
 
-    return Object.entries(summary).map(([ticket, data]) => {
-      const taken = Math.min(data.total, adminHold);
-      const pending = Math.max(data.total - adminHold, 0);
-      return {
-        ticket,
-        total: data.total,
-        taken,
-        pending,
-        offloaded: 0 // To be implemented
-      };
-    }).sort((a, b) => b.total - a.total);
-  }, [sales, adminHold]);
+    return Object.entries(summary).map(([ticket, data]) => ({
+      ticket,
+      total: data.total
+    })).sort((a, b) => b.total - a.total);
+  }, [filteredSales]);
 
   const totals = useMemo(() => {
-    return ticketAggregates.reduce((acc, curr) => ({
-      total: acc.total + curr.total,
-      taken: acc.taken + curr.taken,
-      pending: acc.pending + curr.pending,
-      offloaded: acc.offloaded + curr.offloaded
-    }), { total: 0, taken: 0, pending: 0, offloaded: 0 });
+    return ticketAggregates.reduce((acc, curr) => acc + curr.total, 0);
   }, [ticketAggregates]);
 
   const filteredAgents = useMemo(() => {
@@ -77,13 +90,13 @@ const SalesPage = () => {
 
   const groupedSales = useMemo(() => {
     const groups = {};
-    sales.forEach(s => {
+    filteredSales.forEach(s => {
       const key = s.created_at || 'Unknown';
       if (!groups[key]) groups[key] = [];
       groups[key].push(s);
     });
     return Object.entries(groups).sort((a, b) => new Date(b[0]) - new Date(a[0]));
-  }, [sales]);
+  }, [filteredSales]);
 
   const paginatedGroups = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
@@ -104,15 +117,12 @@ const SalesPage = () => {
 
   const tabs = [
     { id: 'History', label: 'History' },
-    { id: 'Ticket', label: 'Ticket' },
-    { id: 'Taken', label: 'Taken' },
-    { id: 'Pending', label: 'Pending' },
-    { id: 'Offloaded', label: 'Offloaded' }
+    { id: 'Ticket', label: 'Ticket' }
   ];
 
   return (
     <div className="h-full w-full flex flex-col bg-background text-foreground overflow-hidden">
-      {/* Top Bar: Configuration */}
+      {/* Top Bar: Page Context */}
       <header className="flex-none p-4 border-b border-border bg-card/20 backdrop-blur-md flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h1 className="text-xl font-bold text-gradient uppercase tracking-widest">Sales Engine</h1>
@@ -122,17 +132,9 @@ const SalesPage = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3 bg-background/40 border border-border px-3 py-1.5 shadow-inner">
-            <Settings2 size={16} className="text-primary" />
-            <Label className="text-xs uppercase font-bold text-muted-foreground whitespace-nowrap">House Hold</Label>
-            <Input 
-              type="number" 
-              value={adminHold} 
-              onChange={(e) => setAdminHold(Number(e.target.value))}
-              className="w-24 h-7 bg-transparent border-none focus-visible:ring-0 text-right font-mono text-primary font-bold"
-            />
-          </div>
+        <div className="flex items-center gap-2 text-muted-foreground text-xs font-bold uppercase tracking-tighter">
+          <User size={16} className="text-primary" />
+          <span>Agent Operations</span>
         </div>
       </header>
 
@@ -157,29 +159,62 @@ const SalesPage = () => {
           
           <div className="flex-1 overflow-y-auto scrollbar-thin px-2 space-y-1 pb-4">
             {filteredAgents.map(agent => (
-              <button
+              <div
                 key={agent.id}
-                onClick={() => { setSelectedAgent(agent); setIsDialogOpen(true); }}
-                className="w-full flex items-center gap-3 p-3 text-left transition-all hover:bg-primary/5 group relative border border-transparent hover:border-primary/10"
+                className={`w-full flex items-center gap-3 p-3 text-left transition-all group relative border cursor-pointer ${
+                  agentFilter?.id === agent.id 
+                  ? 'bg-primary/10 border-primary/20' 
+                  : 'hover:bg-primary/5 border-transparent hover:border-primary/10'
+                }`}
+                onClick={() => setAgentFilter(agentFilter?.id === agent.id ? null : agent)}
               >
                 <div className="h-10 w-10 flex-none flex items-center justify-center bg-slate-900 border border-border group-hover:border-primary/30 transition-colors">
-                  <User size={18} className="text-muted-foreground group-hover:text-primary" />
+                  <User size={18} className={agentFilter?.id === agent.id ? 'text-primary' : 'text-muted-foreground group-hover:text-primary'} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-bold text-sm truncate group-hover:text-primary transition-colors">{agent.name}</div>
+                  <div className={`font-bold text-sm truncate transition-colors ${agentFilter?.id === agent.id ? 'text-primary' : 'group-hover:text-primary'}`}>{agent.name}</div>
                   <div className="text-[10px] text-muted-foreground uppercase font-mono">{agent.id}</div>
                 </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Plus size={16} className="text-primary" />
-                </div>
-              </button>
+                <button 
+                  className="p-1 hover:bg-primary/20 rounded transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedAgent(agent);
+                    setIsDialogOpen(true);
+                  }}
+                >
+                  <Plus size={18} className="text-primary" />
+                </button>
+              </div>
             ))}
           </div>
         </aside>
 
         {/* Right Content: Data Table */}
         <section className="flex-1 flex flex-col bg-background/50 overflow-hidden">
-          <div className="flex-none p-4 pb-0 flex items-center justify-between bg-card/5 border-b border-border/30">
+          {/* Agent Summary Card */}
+          {agentFilter && (
+            <div className="flex-none p-4 pb-0">
+              <Card className="glass-card border-primary/20 bg-primary/5">
+                <CardContent className="p-4 grid grid-cols-3 gap-6">
+                  <div className="space-y-1">
+                    <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Total Sales</Label>
+                    <div className="text-2xl font-mono font-bold text-primary">${agentSummary.total.toLocaleString()}</div>
+                  </div>
+                  <div className="space-y-1 border-x border-border/30 px-6">
+                    <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Commission ({agentFilter.commission}%)</Label>
+                    <div className="text-2xl font-mono font-bold text-amber-400">${agentSummary.commission.toLocaleString()}</div>
+                  </div>
+                  <div className="space-y-1 text-right">
+                    <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Unique Tickets</Label>
+                    <div className="text-2xl font-mono font-bold text-cyan-400">{agentSummary.uniqueTickets}</div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          <div className="flex-none p-4 pb-0 flex items-center justify-between bg-card/5 border-b border-border/30 mt-2">
             <div className="flex gap-1">
               {tabs.map(tab => (
                 <button
@@ -198,6 +233,11 @@ const SalesPage = () => {
                 </button>
               ))}
             </div>
+            {agentFilter && (
+              <div className="text-[10px] font-bold uppercase text-primary/70 pr-4">
+                Filtering by: {agentFilter.name}
+              </div>
+            )}
           </div>
 
           <div className="flex-1 min-h-0 p-4 overflow-hidden">
@@ -216,11 +256,7 @@ const SalesPage = () => {
                     ) : (
                       <tr>
                         <th>Ticket #</th>
-                        <th className="text-right">
-                          {activeTab === 'Ticket' ? 'Total Amount' :
-                           activeTab === 'Taken' ? 'Taken (House)' :
-                           activeTab === 'Pending' ? 'Pending (Offload)' : 'Offloaded'}
-                        </th>
+                        <th className="text-right">Total Amount</th>
                       </tr>
                     )}
                   </thead>
@@ -249,24 +285,14 @@ const SalesPage = () => {
                       );
                     })}
 
-                    {activeTab !== 'History' && ticketAggregates.map((item) => {
-                      if (activeTab === 'Offloaded') return null;
-                      
-                      const amount = activeTab === 'Ticket' ? item.total :
-                                     activeTab === 'Taken' ? item.taken :
-                                     activeTab === 'Pending' ? item.pending : 0;
-                      
-                      if (activeTab === 'Pending' && amount === 0) return null;
-
-                      return (
-                        <tr key={item.ticket}>
-                          <td className="font-mono font-bold text-primary">{item.ticket}</td>
-                          <td className="text-right font-mono font-bold">
-                            {amount.toLocaleString()}
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {activeTab === 'Ticket' && ticketAggregates.map((item) => (
+                      <tr key={item.ticket}>
+                        <td className="font-mono font-bold text-primary">{item.ticket}</td>
+                        <td className="text-right font-mono font-bold">
+                          {item.total.toLocaleString()}
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -277,9 +303,7 @@ const SalesPage = () => {
                 <div className="text-xl font-mono font-bold text-primary">
                   { (activeTab === 'History' 
                       ? groupedSales.reduce((acc, [_, g]) => acc + g.reduce((s, x) => s + x.amount, 0), 0)
-                      : (activeTab === 'Ticket' ? totals.total :
-                         activeTab === 'Taken' ? totals.taken :
-                         activeTab === 'Pending' ? totals.pending : totals.offloaded)
+                      : totals
                     ).toLocaleString() }
                 </div>
               </div>

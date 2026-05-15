@@ -72,4 +72,12 @@ class DatabaseManager:
                     FOREIGN KEY (master_dealer_id) REFERENCES master_dealers (id)
                 )
             ''')
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS settings (
+                    key TEXT PRIMARY KEY,
+                    value TEXT NOT NULL
+                )
+            ''')
+            # Initialize default admin_hold if not exists
+            cursor.execute('INSERT OR IGNORE INTO settings (key, value) VALUES ("admin_hold", "5000")')
             conn.commit()

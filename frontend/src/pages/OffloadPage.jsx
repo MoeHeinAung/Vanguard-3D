@@ -12,16 +12,18 @@ import { ChevronDown, ChevronRight, Building2, Plus, Search, Settings2, ShieldCh
 const OffloadPage = () => {
   const [dealers, setDealers] = useState([]);
   const [offloads, setOffloads] = useState([]);
+  const [sales, setSales] = useState([]);
   const [draws, setDraws] = useState([]);
   const [selectedDraw, setSelectedDraw] = useState(null);
   const [selectedDealer, setSelectedDealer] = useState(null);
+  const [adminHold, setAdminHold] = useState(5000);
   const [searchTerm, setSearchTerm] = useState('');
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [inputText, setInputText] = useState('');
   const [notes, setNotes] = useState('');
   
-  const [activeTab, setActiveTab] = useState('History');
+  const [activeTab, setActiveTab] = useState('Pending');
   const [expandedGroups, setExpandedGroups] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
@@ -31,12 +33,16 @@ const OffloadPage = () => {
       const drawsData = await callPython('get_draws');
       const dealersData = await callPython('get_master_dealers');
       const offloadsData = await callPython('get_offloads');
+      const salesData = await callPython('get_sales');
+      const hold = await callPython('get_setting', 'admin_hold', '5000');
       
       const openDraw = drawsData.find(d => d.status === 'Open');
       setDraws(drawsData.filter(d => d.status === 'Open'));
       setDealers(dealersData);
       setSelectedDraw(openDraw);
       setOffloads(offloadsData.filter(o => o.draw_id === openDraw?.id));
+      setSales(salesData.filter(s => s.draw_id === openDraw?.id));
+      setAdminHold(Number(hold));
     } catch (error) {
       console.error('Failed to fetch offload data:', error);
     }
@@ -44,24 +50,48 @@ const OffloadPage = () => {
 
   useEffect(() => { fetchData(); }, []);
 
-  const offloadAggregates = useMemo(() => {
+  const handleHoldChange = async (val) => {
+    const newVal = Number(val);
+    setAdminHold(newVal);
+    await callPython('update_setting', 'admin_hold', newVal);
+  };
+
+  const riskAggregates = useMemo(() => {
     const summary = {};
-    offloads.forEach(o => {
-      if (!summary[o.ticket]) {
-        summary[o.ticket] = { total: 0 };
-      }
-      summary[o.ticket].total += o.amount;
+    
+    // Aggregate Sales
+    sales.forEach(s => {
+      if (!summary[s.ticket]) summary[s.ticket] = { sales: 0, offloaded: 0 };
+      summary[s.ticket].sales += s.amount;
     });
 
-    return Object.entries(summary).map(([ticket, data]) => ({
-      ticket,
-      total: data.total
-    })).sort((a, b) => b.total - a.total);
-  }, [offloads]);
+    // Aggregate Offloads
+    offloads.forEach(o => {
+      if (!summary[o.ticket]) summary[o.ticket] = { sales: 0, offloaded: 0 };
+      summary[o.ticket].offloaded += o.amount;
+    });
+
+    return Object.entries(summary).map(([ticket, data]) => {
+      const taken = Math.min(data.sales, adminHold);
+      const pending = Math.max(data.sales - adminHold - data.offloaded, 0);
+      return {
+        ticket,
+        sales: data.sales,
+        offloaded: data.offloaded,
+        taken,
+        pending
+      };
+    }).sort((a, b) => b.sales - a.sales);
+  }, [sales, offloads, adminHold]);
 
   const totals = useMemo(() => {
-    return offloadAggregates.reduce((acc, curr) => acc + curr.total, 0);
-  }, [offloadAggregates]);
+    return riskAggregates.reduce((acc, curr) => ({
+      sales: acc.sales + curr.sales,
+      offloaded: acc.offloaded + curr.offloaded,
+      taken: acc.taken + curr.taken,
+      pending: acc.pending + curr.pending
+    }), { sales: 0, offloaded: 0, taken: 0, pending: 0 });
+  }, [riskAggregates]);
 
   const filteredDealers = useMemo(() => {
     return dealers.filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -101,8 +131,11 @@ const OffloadPage = () => {
   };
 
   const tabs = [
-    { id: 'History', label: 'Offload History' },
-    { id: 'Totals', label: 'Ticket Totals' }
+    { id: 'Pending', label: 'Pending (Risk)' },
+    { id: 'Taken', label: 'Taken (House)' },
+    { id: 'Ticket', label: 'All Tickets' },
+    { id: 'Offloaded', label: 'Offloaded' },
+    { id: 'History', label: 'Offload History' }
   ];
 
   return (
@@ -110,16 +143,24 @@ const OffloadPage = () => {
       {/* Top Bar: Configuration */}
       <header className="flex-none p-4 border-b border-border bg-card/20 backdrop-blur-md flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold text-gradient uppercase tracking-widest">Risk Offloading</h1>
+          <h1 className="text-xl font-bold text-gradient uppercase tracking-widest">Risk Management</h1>
           <div className="h-6 w-px bg-border/50" />
           <div className="flex items-center gap-2">
             <span className="badge-elegant badge-elegant-info">{selectedDraw?.draw_date || 'No Draw'}</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-muted-foreground text-xs font-bold uppercase tracking-tighter">
-          <ShieldCheck size={16} className="text-primary" />
-          <span>Liability Management</span>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 bg-background/40 border border-border px-3 py-1.5 shadow-inner">
+            <Settings2 size={16} className="text-primary" />
+            <Label className="text-xs uppercase font-bold text-muted-foreground whitespace-nowrap">Admin Hold Limit</Label>
+            <Input 
+              type="number" 
+              value={adminHold} 
+              onChange={(e) => handleHoldChange(e.target.value)}
+              className="w-24 h-7 bg-transparent border-none focus-visible:ring-0 text-right font-mono text-primary font-bold"
+            />
+          </div>
         </div>
       </header>
 
@@ -203,7 +244,11 @@ const OffloadPage = () => {
                     ) : (
                       <tr>
                         <th>Ticket #</th>
-                        <th className="text-right">Total Offloaded</th>
+                        <th className="text-right">
+                          {activeTab === 'Pending' ? 'Pending (Offload)' :
+                           activeTab === 'Taken' ? 'Taken (House)' :
+                           activeTab === 'Ticket' ? 'Total Sales' : 'Total Offloaded'}
+                        </th>
                       </tr>
                     )}
                   </thead>
@@ -232,25 +277,35 @@ const OffloadPage = () => {
                       );
                     })}
 
-                    {activeTab === 'Totals' && offloadAggregates.map((item) => (
-                      <tr key={item.ticket}>
-                        <td className="font-mono font-bold text-primary">{item.ticket}</td>
-                        <td className="text-right font-mono font-bold">
-                          {item.total.toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
+                    {activeTab !== 'History' && riskAggregates.map((item) => {
+                      const amount = activeTab === 'Pending' ? item.pending :
+                                     activeTab === 'Taken' ? item.taken :
+                                     activeTab === 'Ticket' ? item.sales : item.offloaded;
+                      
+                      if (activeTab === 'Pending' && amount === 0) return null;
+
+                      return (
+                        <tr key={item.ticket}>
+                          <td className="font-mono font-bold text-primary">{item.ticket}</td>
+                          <td className="text-right font-mono font-bold">
+                            {amount.toLocaleString()}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
 
               {/* Total Row */}
               <div className="flex-none border-t border-primary/20 bg-primary/5 p-4 flex justify-between items-center">
-                <div className="text-xs font-bold uppercase tracking-widest text-primary/70">Global Offload Summary</div>
+                <div className="text-xs font-bold uppercase tracking-widest text-primary/70">Global risk Summary</div>
                 <div className="text-xl font-mono font-bold text-primary">
                   { (activeTab === 'History' 
                       ? groupedOffloads.reduce((acc, [_, g]) => acc + g.reduce((s, x) => s + x.amount, 0), 0)
-                      : totals
+                      : (activeTab === 'Pending' ? totals.pending :
+                         activeTab === 'Taken' ? totals.taken :
+                         activeTab === 'Ticket' ? totals.sales : totals.offloaded)
                     ).toLocaleString() }
                 </div>
               </div>
