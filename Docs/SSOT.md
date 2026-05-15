@@ -74,7 +74,7 @@ Vanguard-3D/
 │   │   ├── components/
 │   │   │   ├── features/     # Domain-specific components (forms, tables)
 │   │   │   ├── layout/       # Navbar navigation
-│   │   │   └── ui/           # Primitive components (Button, ErrorBoundary)
+│   │   │   └── ui/           # Primitive components (Button, Card, Textarea, Dialog)
 │   │   ├── services/         # API abstraction layer
 │   │   ├── context/          # Notification state provider
 │   │   └── utils/            # pywebview bridge utility
