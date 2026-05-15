@@ -307,36 +307,32 @@ const OffloadPage = () => {
               </div>
 
               {/* Template Body: 4 Columns of 15 */}
-              <div className="flex-1 grid grid-cols-4 gap-12 min-h-0">
+              <div className="flex-1 grid grid-cols-4 gap-8 min-h-0 overflow-hidden">
                 {templateGrid.map((column, colIdx) => (
-                  <div key={colIdx} className="flex flex-col h-full">
-                    <div className="flex-1 min-h-0 overflow-hidden">
-                      <table className="w-full border-collapse">
-                        <thead>
-                          <tr className="border-b-2 border-black/20">
-                            <th className="text-left text-[10px] uppercase font-black py-1 tracking-widest opacity-40">Ticket</th>
-                            <th className="text-right text-[10px] uppercase font-black py-1 tracking-widest opacity-40">Amount</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-black/5">
-                          {Array.from({ length: 15 }).map((_, rowIdx) => {
-                            const item = column[rowIdx];
-                            return (
-                              <tr key={rowIdx} className="group">
-                                <td className="font-mono text-[15px] font-bold py-1.5">
-                                  {item?.ticket || ''}
-                                </td>
-                                <td className="text-right font-mono text-[15px] font-bold py-1.5">
-                                  {item ? item.amount.toLocaleString() : ''}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                  <div key={colIdx} className="flex flex-col h-full border-r border-black/5 last:border-r-0 pr-4 last:pr-0">
+                    <div className="flex-1 flex flex-col min-h-0">
+                      {Array.from({ length: 15 }).map((_, rowIdx) => {
+                        const item = column[rowIdx];
+                        return (
+                          <div 
+                            key={rowIdx} 
+                            className={`flex justify-between items-center px-2 py-1.5 flex-1 min-h-[28px] ${
+                              rowIdx % 2 === 0 ? 'bg-black/[0.015]' : ''
+                            }`}
+                          >
+                            <span className="font-mono text-sm font-bold tracking-tight">
+                              {item?.ticket || ''}
+                            </span>
+                            <span className="font-mono text-sm font-bold">
+                              {item ? item.amount.toLocaleString() : ''}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
-                    <div className="mt-auto pt-4 border-t-4 border-black flex justify-end items-center">
-                      <span className="font-mono text-xl font-black">
+                    {/* Subtotal row with 1px border */}
+                    <div className="mt-auto pt-2 border-t border-black flex justify-end items-center px-2">
+                      <span className="font-mono text-lg font-bold">
                         {column.reduce((sum, item) => sum + item.amount, 0).toLocaleString()}
                       </span>
                     </div>
