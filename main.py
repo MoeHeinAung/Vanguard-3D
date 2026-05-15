@@ -175,6 +175,7 @@ def main():
     window = webview.create_window(
         'Vanguard 3D',
         'http://localhost:5173',
+        maximized=True,
         js_api=api
     )
     webview.start(debug=True)
