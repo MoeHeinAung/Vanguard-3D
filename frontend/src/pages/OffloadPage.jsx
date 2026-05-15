@@ -341,13 +341,19 @@ const OffloadPage = () => {
               </div>
 
               {/* Template Footer */}
-              <div className="mt-12 pt-8 border-t-[8px] border-black flex justify-end items-center gap-6">
-                <span className="text-xs font-black uppercase tracking-[0.3em] opacity-40">Total Amount Offloaded</span>
-                <div className="flex items-baseline gap-3">
-                  <span className="text-5xl font-black font-mono underline underline-offset-[12px] decoration-4">
-                    {batchTotal.toLocaleString()}
-                  </span>
-                  <span className="text-2xl font-black italic">Ks</span>
+              <div className="mt-6 pt-6 border-t-2 border-black flex justify-between items-center">
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-30">Security Verification</span>
+                  <span className="font-mono text-[9px] text-gray-400">V3D-OFFLOAD-SYS-REF-{selectedDraw?.id}</span>
+                </div>
+                <div className="flex items-baseline gap-4">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40">Total Amount Offloaded</span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-4xl font-bold font-mono">
+                      {batchTotal.toLocaleString()}
+                    </span>
+                    <span className="text-xl font-bold italic opacity-60">Ks</span>
+                  </div>
                 </div>
               </div>
             </div>
