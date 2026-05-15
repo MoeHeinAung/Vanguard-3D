@@ -287,53 +287,56 @@ const OffloadPage = () => {
         </aside>
 
         {/* MAIN CONTENT: Template Preview (Wide) */}
-        <main className="flex-1 bg-black/40 p-6 overflow-y-auto scrollbar-thin flex flex-col items-center">
+        <main className="flex-1 bg-black/40 p-6 overflow-hidden flex flex-col items-center justify-center">
           {templateBatch.length > 0 ? (
-            <div className="w-full max-w-5xl bg-white text-black p-8 shadow-2xl relative overflow-hidden flex flex-col min-h-[700px]">
+            <div className="w-full h-full bg-white text-black p-10 shadow-2xl relative overflow-hidden flex flex-col">
               {/* Paper Texture Overlay */}
               <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/pinstriped-suit.png')]" />
               
               {/* Template Header */}
-              <div className="flex justify-between items-start border-b-2 border-black pb-4 mb-6">
+              <div className="flex justify-between items-baseline border-b-2 border-black pb-4 mb-6">
                 <div>
-                  <h1 className="text-3xl font-black uppercase tracking-tighter italic">KALAW</h1>
-                  <p className="text-[10px] font-bold tracking-widest opacity-60">VANGUARD RISK OFFLOAD SYSTEM</p>
+                  <h1 className="text-3xl font-bold uppercase tracking-[0.2em] leading-none">KALAW</h1>
                 </div>
-                <div className="text-center">
-                  <p className="text-[10px] font-bold uppercase tracking-widest">Draw Date</p>
-                  <p className="text-xl font-black font-mono">{selectedDraw?.draw_date}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-bold uppercase tracking-widest">Page</p>
-                  <p className="text-3xl font-black font-mono leading-none">{pageNumber}</p>
+                <div className="flex items-baseline gap-6 text-right">
+                  <p className="text-[10px] font-bold font-mono text-gray-400 uppercase tracking-widest">{selectedDraw?.draw_date}</p>
+                  <p className="text-lg font-bold uppercase tracking-widest leading-none">
+                    <span className="text-[10px] mr-2 opacity-30">PAGE</span> {pageNumber}
+                  </p>
                 </div>
               </div>
 
               {/* Template Body: 4 Columns of 15 */}
-              <div className="flex-1 grid grid-cols-4 gap-8">
+              <div className="flex-1 grid grid-cols-4 gap-12 min-h-0">
                 {templateGrid.map((column, colIdx) => (
-                  <div key={colIdx} className="flex flex-col">
-                    <table className="w-full border-collapse">
-                      <tbody className="divide-y divide-black/10 border-t border-b border-black/20">
-                        {/* Ensure exactly 15 rows for visual consistency */}
-                        {Array.from({ length: 15 }).map((_, rowIdx) => {
-                          const item = column[rowIdx];
-                          return (
-                            <tr key={rowIdx} className="h-7">
-                              <td className="w-1/2 font-mono text-[13px] font-bold border-r border-black/5 pl-1">
-                                {item?.ticket || ''}
-                              </td>
-                              <td className="w-1/2 text-right font-mono text-[13px] font-bold pr-1">
-                                {item ? item.amount.toLocaleString() : ''}
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                    <div className="mt-2 pt-2 border-t-2 border-black flex justify-between items-center px-1">
-                      <span className="text-[9px] font-bold uppercase">Subtotal</span>
-                      <span className="font-mono text-[12px] font-black">
+                  <div key={colIdx} className="flex flex-col h-full">
+                    <div className="flex-1 min-h-0 overflow-hidden">
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="border-b-2 border-black/20">
+                            <th className="text-left text-[10px] uppercase font-black py-1 tracking-widest opacity-40">Ticket</th>
+                            <th className="text-right text-[10px] uppercase font-black py-1 tracking-widest opacity-40">Amount</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-black/5">
+                          {Array.from({ length: 15 }).map((_, rowIdx) => {
+                            const item = column[rowIdx];
+                            return (
+                              <tr key={rowIdx} className="group">
+                                <td className="font-mono text-[15px] font-bold py-1.5">
+                                  {item?.ticket || ''}
+                                </td>
+                                <td className="text-right font-mono text-[15px] font-bold py-1.5">
+                                  {item ? item.amount.toLocaleString() : ''}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="mt-auto pt-4 border-t-4 border-black flex justify-end items-center">
+                      <span className="font-mono text-xl font-black">
                         {column.reduce((sum, item) => sum + item.amount, 0).toLocaleString()}
                       </span>
                     </div>
@@ -342,24 +345,15 @@ const OffloadPage = () => {
               </div>
 
               {/* Template Footer */}
-              <div className="mt-8 pt-6 border-t-4 border-black flex justify-end">
-                <div className="flex flex-col items-end gap-1">
-                  <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Total Amount Offloaded</span>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-[10px] font-bold uppercase">Totally -</span>
-                    <span className="text-3xl font-black font-mono italic underline decoration-2 underline-offset-4">
-                      {batchTotal.toLocaleString()}
-                    </span>
-                    <span className="text-xl font-black italic">Ks</span>
-                  </div>
+              <div className="mt-12 pt-8 border-t-[8px] border-black flex justify-end items-center gap-6">
+                <span className="text-xs font-black uppercase tracking-[0.3em] opacity-40">Total Amount Offloaded</span>
+                <div className="flex items-baseline gap-3">
+                  <span className="text-5xl font-black font-mono underline underline-offset-[12px] decoration-4">
+                    {batchTotal.toLocaleString()}
+                  </span>
+                  <span className="text-2xl font-black italic">Ks</span>
                 </div>
               </div>
-
-              {/* Decorative Corner Marks */}
-              <div className="absolute top-0 left-0 w-4 h-4 border-t-4 border-l-4 border-black" />
-              <div className="absolute top-0 right-0 w-4 h-4 border-t-4 border-r-4 border-black" />
-              <div className="absolute bottom-0 left-0 w-4 h-4 border-b-4 border-l-4 border-black" />
-              <div className="absolute bottom-0 right-0 w-4 h-4 border-b-4 border-r-4 border-black" />
             </div>
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-center max-w-md opacity-30 select-none">
