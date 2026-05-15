@@ -15,6 +15,9 @@ function Navbar({ onNavigate }) {
             <Button variant="ghost" onClick={() => onNavigate('sales')}>
               Sales
             </Button>
+            <Button variant="ghost" onClick={() => onNavigate('tickets')}>
+              Tickets
+            </Button>
             <Button variant="ghost" onClick={() => onNavigate('agents')}>
               Agents
             </Button>

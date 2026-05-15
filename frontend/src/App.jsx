@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import DrawsPage from './pages/DrawsPage'
 import SalesPage from './pages/SalesPage'
+import TicketsPage from './pages/TicketsPage'
 import AgentsPage from './pages/AgentsPage'
 import MasterDealersPage from './pages/MasterDealersPage'
 import Navbar from './components/layout/Navbar'
@@ -12,6 +13,7 @@ function App() {
     switch (currentPage) {
       case 'draws': return <DrawsPage />
       case 'sales': return <SalesPage />
+      case 'tickets': return <TicketsPage />
       case 'agents': return <AgentsPage />
       case 'master-dealers': return <MasterDealersPage />
       default: return (
