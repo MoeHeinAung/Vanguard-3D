@@ -55,9 +55,9 @@ function DrawsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="h-full flex flex-col p-6 overflow-hidden">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+      <div className="flex-none flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gradient mb-1">
             {selectedDraw ? `Draw: ${selectedDraw.draw_date}` : 'Draw Management'}
@@ -83,18 +83,18 @@ function DrawsPage() {
       </div>
 
       {/* Master-Detail Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 overflow-hidden">
 
         {/* ── Sidebar: Draw History ── */}
-        <Card className="corner-accent">
-          <CardHeader>
+        <Card className="corner-accent flex flex-col h-full overflow-hidden">
+          <CardHeader className="flex-none">
             <CardTitle className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
               <Calendar className="inline mr-2 h-4 w-4" />
               History
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
-            <div className="max-h-[60vh] overflow-y-auto scrollbar-thin">
+          <CardContent className="flex-1 p-0 overflow-hidden">
+            <div className="h-full overflow-y-auto scrollbar-thin">
               {draws.map((draw) => (
                 <button
                   key={draw.id}
@@ -126,10 +126,10 @@ function DrawsPage() {
         </Card>
 
         {/* ── Detail Panel ── */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 h-full overflow-hidden flex flex-col">
           {selectedDraw ? (
-            <Card className="corner-accent">
-              <CardHeader className="flex flex-row items-center justify-between">
+            <Card className="corner-accent h-full flex flex-col overflow-hidden">
+              <CardHeader className="flex-none flex flex-row items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Flag className="h-5 w-5 text-primary" />
                   Draw Information
@@ -143,7 +143,7 @@ function DrawsPage() {
                   {selectedDraw.status}
                 </Badge>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="flex-1 space-y-6 overflow-y-auto scrollbar-thin pb-6">
                 <div className="grid grid-cols-2 gap-6">
                   <div className="p-4 bg-surface-container/50 border border-border/30 rounded-none">
                     <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cutoff Time</Label>
@@ -157,7 +157,7 @@ function DrawsPage() {
 
                 <div className="p-4 bg-surface-container/50 border border-border/30 rounded-none">
                   <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Internal Notes</Label>
-                  <p className="text-sm mt-1 text-muted-foreground">
+                  <p className="text-sm mt-1 text-muted-foreground whitespace-pre-wrap">
                     {selectedDraw.notes || 'No administrative notes for this draw.'}
                   </p>
                 </div>
@@ -170,8 +170,8 @@ function DrawsPage() {
               </CardContent>
             </Card>
           ) : (
-            <Card className="corner-accent">
-              <CardContent className="py-24 text-center">
+            <Card className="corner-accent h-full flex items-center justify-center">
+              <CardContent className="text-center">
                 <Flag className="h-12 w-12 text-muted-foreground/30 mx-auto mb-4" />
                 <p className="text-muted-foreground text-lg">Select a draw from the history to view details.</p>
               </CardContent>

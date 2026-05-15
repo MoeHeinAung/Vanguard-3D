@@ -44,9 +44,9 @@ const TicketsPage = () => {
   }, [filteredSales]);
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
+    <div className="h-full flex flex-col p-6 overflow-hidden">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-8">
+      <div className="flex-none flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gradient mb-1 flex items-center gap-3">
             <Ticket className="h-7 w-7" />
@@ -64,21 +64,21 @@ const TicketsPage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-hidden">
 
         {/* ── Ticket Totals ── */}
-        <Card className="corner-accent">
-          <CardHeader className="flex flex-row items-center justify-between">
+        <Card className="corner-accent flex flex-col h-full overflow-hidden">
+          <CardHeader className="flex-none flex flex-row items-center justify-between">
             <CardTitle className="text-sm font-bold uppercase tracking-wider flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
               Ticket Totals
             </CardTitle>
             <span className="text-[10px] text-muted-foreground">{ticketSummary.length} tickets</span>
           </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
+          <CardContent className="flex-1 p-0 overflow-hidden">
+            <div className="h-full overflow-y-auto scrollbar-thin">
               <table className="data-table w-full">
-                <thead>
+                <thead className="sticky top-0 z-10">
                   <tr>
                     <th>Ticket</th>
                     <th className="text-right">Total Amount</th>
@@ -106,18 +106,20 @@ const TicketsPage = () => {
         </Card>
 
         {/* ── Detail Placeholder ── */}
-        <Card className="corner-accent">
-          <CardHeader>
+        <Card className="corner-accent h-full flex flex-col overflow-hidden">
+          <CardHeader className="flex-none">
             <CardTitle className="text-sm font-bold uppercase tracking-wider flex items-center gap-2">
               <Ticket className="h-4 w-4" />
               Ticket Details
             </CardTitle>
           </CardHeader>
-          <CardContent className="min-h-[400px] flex items-center justify-center text-muted-foreground border-2 border-dashed border-border/50 rounded-none">
-            <div className="text-center">
-              <Ticket className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
-              <p className="text-sm">Select a ticket to view detailed records</p>
-              <p className="text-[11px] text-muted-foreground/70 mt-1">Click any row in the ticket totals table</p>
+          <CardContent className="flex-1 flex items-center justify-center p-6">
+            <div className="w-full h-full flex items-center justify-center text-muted-foreground border-2 border-dashed border-border/50 rounded-none">
+              <div className="text-center">
+                <Ticket className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
+                <p className="text-sm">Select a ticket to view detailed records</p>
+                <p className="text-[11px] text-muted-foreground/70 mt-1">Click any row in the ticket totals table</p>
+              </div>
             </div>
           </CardContent>
         </Card>

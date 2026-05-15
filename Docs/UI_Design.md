@@ -463,49 +463,46 @@ Full Radix dialog suite with glassmorphism overlay and slide-in animation.
 
 **Sub-components:** `Dialog`, `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogFooter`, `DialogTitle`, `DialogDescription`, `DialogClose`, `DialogPortal`, `DialogOverlay`
 
+### 9.8 Select (`select.jsx`)
+
+Radix-based select with glassmorphism treatment.
+
+**Sub-components:** `Select`, `SelectGroup`, `SelectValue`, `SelectTrigger`, `SelectContent`, `SelectItem`, `SelectSeparator`
+
 ---
 
 ## 10. Page Layouts
+
+### Architectural Mandate: Viewport Containment
+
+Every page MUST fit exactly within the window dimensions. Global document-level scrolling is prohibited.
+
+**Structural Recipe:**
+1. Root: `h-full flex flex-col overflow-hidden`
+2. Middle Wrapper: `flex-1 min-h-0 overflow-hidden` (enables children to fill height)
+3. Content: `h-full overflow-y-auto` (internal scroll only)
 
 ### Pattern A: Master-Detail Grid (Data Entities)
 
 Used by: `DrawsPage`, `AgentsPage`, `MasterDealersPage`
 
-```
-┌─────────────────────────────────────────────────────┐
-│ Header: <h1> + <p> + [New Entity Button]            │
-├─────────────┬───────────────────────────────────────┤
-│ Sidebar     │ Detail Panel                          │
-│ (list/cards)│ (selected entity details / form)      │
-│  .lg:col-1  │  .lg:col-2                           │
-└─────────────┴───────────────────────────────────────┘
-```
+- Header remains fixed.
+- Sidebar and Detail scroll independently.
+- Summary footers remain pinned.
 
-**Sidebar list items:**
-- Full-width buttons with `border-b border-border`
-- Selected: `bg-accent/10 border-l-2 border-l-primary ring-1 ring-primary/10`
-- Hover: `hover:bg-accent/10`
-- Contain title + metadata line
-
-**Detail panel:**
-- Empty state: Centered muted text
-- Filled: Card with CardHeader (title + action buttons) + CardContent
-- Form fields in 2-3 column grid
-
-### Pattern B: Two-Column Action Panel
+### Pattern B: Sales Engine Action Panel
 
 Used by: `SalesPage`
 
-```
-┌─────────────────────────────────────────────────────┐
-│ Header: <h1> with gradient text                     │
-├──────────────┬──────────────────────────────────────┤
-│ Control      │ Data Table / Output                  │
-│ Panel        │ .overflow-auto                       │
-│ (selectors,  │ (table with header + rows + footer)  │
-│  inputs)     │                                      │
-└──────────────┴──────────────────────────────────────┘
-```
+**Logic Model:**
+- **Admin Hold**: User-configurable numerical threshold.
+- **Taken**: `min(Total Amount, Admin Hold)`
+- **Pending**: `max(Total Amount - Admin Hold, 0)`
+
+**Layout:**
+- Top: Configuration bar (Admin Hold input).
+- Left: Agent sidebar (triggering Sale Modal).
+- Right: Tabbed aggregation table with sticky header and pinned total footer.
 
 ### Pattern C: Data Table
 
@@ -514,13 +511,11 @@ Standard table structure:
 ┌─────────────────────────────────────────────┐
 │ CardHeader: Title + right-side count/badge  │
 ├─────────────────────────────────────────────┤
-│ thead: uppercase label-caps text, left-     │
-│        aligned with right-aligned actions   │
+│ thead: sticky top-0, uppercase label-caps   │
 ├─────────────────────────────────────────────┤
-│ tbody: Data rows with border-divider        │
-│        hover:bg-white/5 cursor-pointer      │
+│ tbody: overflow-y-auto data rows            │
 ├─────────────────────────────────────────────┤
-│ Footer: Pagination / "Showing X of Y"      │
+│ Footer: flex-none pinned summary row        │
 └─────────────────────────────────────────────┘
 ```
 

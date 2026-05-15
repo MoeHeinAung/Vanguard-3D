@@ -53,8 +53,15 @@ src/components/ui/      # shadcn primitive components
   ├── input.jsx
   ├── label.jsx
   ├── badge.jsx
+  ├── select.jsx        # Added: Radix-based Select
   └── textarea.jsx
 ```
+
+### Core Principles
+- **Viewport Containment**: All UI must fit 100% within the application window. Global document scrolling is strictly prohibited.
+- **Master-Detail Standard**: Entity management follows the sidebar-panel navigation pattern.
+- **Bridge-Only IO**: All data fetching must utilize the `callPython` utility.
+- **Glassmorphism**: Visual depth achieved via backdrop blurs and semi-transparent layers.
 
 ---
 

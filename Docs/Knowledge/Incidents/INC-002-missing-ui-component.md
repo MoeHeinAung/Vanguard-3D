@@ -5,7 +5,7 @@ INC-002
 Dependency Resolution Failure: Missing UI Primitive
 ---
 # Status
-ACTIVE
+RESOLVED
 ---
 # Severity
 MEDIUM
@@ -40,6 +40,10 @@ Assumed availability of standard `shadcn/ui` primitives without verifying the cu
 - Verify `components/ui/` contents before adding new imports.
 - Update `Docs/SSOT.md` or a local registry if new primitives are added.
 ---
+# Resolution Summary
+1. Installed `@radix-ui/react-select` dependency.
+2. Implemented `frontend/src/components/ui/select.jsx` using the project's Modern-Futuristic design tokens (glassmorphism, `rounded-none`).
+---
 # Validation Checklist
-* [ ] Verify file existence before adding `import` statements.
-* [ ] Initialize missing `shadcn` components using standard CLI or templates.
+* [x] Verify file existence before adding `import` statements.
+* [x] Initialize missing `shadcn` components using standard CLI or templates.
