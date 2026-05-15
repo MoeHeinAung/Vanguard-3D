@@ -1,8 +1,8 @@
 # Task ID
-TASK-004
+TASK-005
 ---
 # Title
-Sale CRUD Implementation
+Risk Offloading Implementation
 ---
 # Status
 COMPLETED
@@ -14,44 +14,20 @@ HIGH
 Feature
 ---
 # Goal
-Implement Sale management to allow agents to record ticket sales for specific draws. This includes a custom parser for multi-line inputs, database schema definition with relations, and a two-column Master-Detail UI.
+Implement Risk Offloading system to transfer liability of high-risk ('hot') tickets to Master Dealers.
 ---
 # Scope
 ## Included
-- Add `sales` table to `vanguard.db` with foreign keys to `draws` and `agents`.
-- Implement `SaleService` with batch creation capabilities.
-- Custom logic to parse "TICKET = AMOUNT" input format.
-- Two-column form: Left (Draw selection, Agent selection), Right (Multi-line input).
+- Add `offloaded_tickets` table to `vanguard.db`.
+- Implement `OffloadService` with bulk insertion logic.
+- Expose `get_offloads` and `create_offload` in `main.py` with robust error handling.
+- Build `OffloadPage.jsx` using Master-Detail layout and reactive calculation model.
+- Integrated into `App.jsx` and `Navbar.jsx`.
 ## Excluded
-- Complex risk offloading (separate task).
-- Ticket sales reporting/analytics.
----
-# Implementation Plan
-## Step 1
-Description:
-Update `DatabaseManager` to define `sales` table with foreign key constraints.
-## Step 2
-Description:
-Implement `SaleService` in `backend/services/sale_service.py` with bulk insertion logic and grouping by `created_at`.
-## Step 3
-Description:
-Expose `create_sales` and `get_sales` methods in `main.py`.
-## Step 4
-Description:
-Implement `SalesPage.jsx` with the requested two-column layout and input parser.
-## Step 5
-Description:
-Register `SalesPage` in `App.jsx` and `Navbar`.
----
-# Files Expected To Change
-- backend/database/manager.py
-- backend/services/sale_service.py
-- main.py
-- frontend/src/pages/SalesPage.jsx
-- frontend/src/App.jsx
-- frontend/src/components/layout/Navbar.jsx
+- Automatic offloading logic.
 ---
 # Validation Strategy
-- Verify bulk ticket parsing correctly handles valid/invalid formats.
-- Verify foreign key integrity (Draw/Agent).
-- Ensure entries are grouped correctly by `created_at` timestamp.
+- Verify bulk ticket parsing.
+- Verify relational integrity (Draw/Dealer).
+- Ensure "Total Summary" footer is pinned and visible at 100vh.
+

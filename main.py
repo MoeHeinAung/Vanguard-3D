@@ -6,6 +6,7 @@ from backend.services.draw_service import DrawService
 from backend.services.agent_service import AgentService
 from backend.services.master_dealer_service import MasterDealerService
 from backend.services.sale_service import SaleService
+from backend.services.offload_service import OffloadService
 
 class API:
     def __init__(self):
@@ -14,6 +15,7 @@ class API:
         self.agent_service = AgentService(self.db)
         self.md_service = MasterDealerService(self.db)
         self.sale_service = SaleService(self.db)
+        self.offload_service = OffloadService(self.db)
 
     # Draws
     def hello(self):
@@ -130,6 +132,23 @@ class API:
             )
         except Exception as e:
             print(f"Error in create_sales: {e}", file=sys.stderr)
+            raise e
+
+    # Offloads
+    def get_offloads(self):
+        try:
+            return self.offload_service.get_offloads()
+        except Exception as e:
+            print(f"Error in get_offloads: {e}", file=sys.stderr)
+            raise e
+
+    def create_offload(self, data):
+        try:
+            return self.offload_service.create_offload(
+                data['draw_id'], data['master_dealer_id'], data['input_text'], data.get('notes')
+            )
+        except Exception as e:
+            print(f"Error in create_offload: {e}", file=sys.stderr)
             raise e
 
 def main():

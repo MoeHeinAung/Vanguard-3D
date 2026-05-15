@@ -59,4 +59,17 @@ class DatabaseManager:
                     FOREIGN KEY (agent_id) REFERENCES agents (id)
                 )
             ''')
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS offloaded_tickets (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    draw_id INTEGER NOT NULL,
+                    master_dealer_id TEXT NOT NULL,
+                    ticket TEXT NOT NULL,
+                    amount REAL NOT NULL,
+                    notes TEXT,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (draw_id) REFERENCES draws (id),
+                    FOREIGN KEY (master_dealer_id) REFERENCES master_dealers (id)
+                )
+            ''')
             conn.commit()

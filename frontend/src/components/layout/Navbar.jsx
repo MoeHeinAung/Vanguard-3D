@@ -15,6 +15,9 @@ function Navbar({ onNavigate }) {
             <Button variant="ghost" size="sm" onClick={() => onNavigate('sales')} className="text-xs font-semibold uppercase tracking-wider">
               Sales
             </Button>
+            <Button variant="ghost" size="sm" onClick={() => onNavigate('offload')} className="text-xs font-semibold uppercase tracking-wider">
+              Risk Management
+            </Button>
             <Button variant="ghost" size="sm" onClick={() => onNavigate('tickets')} className="text-xs font-semibold uppercase tracking-wider">
               Tickets
             </Button>

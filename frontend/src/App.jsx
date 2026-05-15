@@ -4,6 +4,7 @@ import SalesPage from './pages/SalesPage'
 import TicketsPage from './pages/TicketsPage'
 import AgentsPage from './pages/AgentsPage'
 import MasterDealersPage from './pages/MasterDealersPage'
+import OffloadPage from './pages/OffloadPage'
 import Navbar from './components/layout/Navbar'
 import { TrendingUp, BarChart3, Users, Ticket, Layers, Shield } from 'lucide-react'
 
@@ -17,6 +18,7 @@ function App() {
       case 'tickets': return <TicketsPage />
       case 'agents': return <AgentsPage />
       case 'master-dealers': return <MasterDealersPage />
+      case 'offload': return <OffloadPage />
       default: return <Dashboard />
     }
   }
