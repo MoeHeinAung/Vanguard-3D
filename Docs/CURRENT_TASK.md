@@ -2,7 +2,7 @@
 TASK-005
 ---
 # Title
-Risk Offloading Implementation
+Risk Management (Offloading) Redesign
 ---
 # Status
 COMPLETED
@@ -14,20 +14,33 @@ HIGH
 Feature
 ---
 # Goal
-Implement Risk Offloading system to transfer liability of high-risk ('hot') tickets to Master Dealers.
+Redesign the Risk Management page with a sidebar-main layout and implement a constrained offloading template system.
 ---
 # Scope
 ## Included
-- Add `offloaded_tickets` table to `vanguard.db`.
-- Implement `OffloadService` with bulk insertion logic.
-- Expose `get_offloads` and `create_offload` in `main.py` with robust error handling.
-- Build `OffloadPage.jsx` using Master-Detail layout and reactive calculation model.
-- Integrated into `App.jsx` and `Navbar.jsx`.
+- Reconfigure `OffloadPage.jsx` layout: Narrow sidebar (Pending list) and Wide main area (Template preview).
+- Implement "Perform Offload" logic:
+    - Limit by `Max Offload Amount` per ticket.
+    - Limit by `Max Offload Ticket` (batch size).
+    - Formula: `Offloaded = min(Pending, Max Offload Amount)`.
+- Implement Template UI:
+    - Header: "Kalaw", Draw Date, Page Number (auto-increment).
+    - Body: 4 horizontal tables of 15 records each (no headers, subtotal per table).
+    - Footer: "Totally - [Sum] Ks".
+- Persistence: Record offloads in `offloaded_tickets` table via `create_offload`.
 ## Excluded
-- Automatic offloading logic.
+- Automatic (scheduled) offloading.
+- PDF/Print export (UI preview only for now).
 ---
 # Validation Strategy
-- Verify bulk ticket parsing.
-- Verify relational integrity (Draw/Dealer).
-- Ensure "Total Summary" footer is pinned and visible at 100vh.
+- Verify transfer logic respects Max Amount/Ticket constraints.
+- Verify template layout (4 columns, 15 rows) fills correctly.
+- Ensure pending list recalculates after offload.
+- Verify page number incrementation.
+---
+# Completion Notes
+- Redesigned `OffloadPage.jsx` with sidebar-main layout.
+- Implemented "Kalaw" template engine with 4x15 grid.
+- Integrated persistent settings for Page Number and Risk Constraints.
+- Verified real-time pending list recalculation.
 
