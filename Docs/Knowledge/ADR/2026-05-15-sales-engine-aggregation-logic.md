@@ -45,22 +45,34 @@ Implement a **Reactive Derived State** model in the frontend using React's `useM
 
 1.  **Formula Standard**:
     - **Total**: $\sum(\text{Sales Amount per Ticket})$
-    - **Taken (House)**: $\min(\text{Total}, \text{Admin Hold})$
-    - **Pending (Offload)**: $\max(\text{Total} - \text{Admin Hold}, 0)$
+    - **Holding (House)**: $\min(\text{Total}, \text{Admin Hold})$
+    - **Pending (Offload)**: $\max(\text{Total} - \text{Admin Hold} - \text{Offloaded Amount}, 0)$
+    - **Offloaded**: $\sum(\text{Offloaded Amount per Ticket})$
+
 2.  **Aggregation Strategy**:
-    - Perform all grouping and mathematical calculations in the frontend to provide instant feedback when the "House Hold" input changes.
-    - Use `useMemo` with dependencies on both the `sales` array and the `adminHold` value.
-3.  **UI Filtering**:
-    - Automatically hide tickets with 0 "Pending" amount when in the "Pending" tab to focus administrative attention on offloading needs.
-4.  **Summary Tier**:
+    - Perform all grouping and mathematical calculations in the frontend to provide instant feedback when the "House Hold" or other risk thresholds change.
+    - Use `useMemo` with dependencies on `sales`, `offloads`, and persistent risk settings.
+
+3.  **Risk Control Settings**:
+    - **Admin Hold Amount**: Maximum liability the House is willing to carry per ticket.
+    - **Max Offload Amount**: Upper limit for batch offloading (future logic).
+    - **Max Offload Ticket**: Maximum number of unique tickets to include in an offload batch (future logic).
+
+4.  **UI Architecture (Risk Management)**:
+    - **Dual-Table Grid**: 
+        - **Left**: Dynamic view supporting `Holding`, `Pending`, and `Offloaded` perspectives.
+        - **Right**: Export Preview engine for template generation.
+
+5.  **Summary Tier**:
     - Calculate a global total for the currently active tab's primary metric to ensure high-level visibility.
 
 ---
 
 # Scope
 
-- `SalesPage.jsx` logic.
+- `SalesPage.jsx` and `OffloadPage.jsx` logic.
 - Ticket calculation formulas.
+- Application settings persistence.
 
 ---
 

@@ -45,7 +45,7 @@ function Dashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <button
             onClick={() => setCurrentPage('draws')}
-            className="glass-card p-6 hover-lift text-left transition-all duration-200 hover:shadow-lg hover:border-primary/30 group"
+            className="glass-card p-6 text-left transition-all duration-200 hover:shadow-lg hover:border-primary/30 group"
           >
             <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors duration-200">
               <BarChart3 className="h-6 w-6 text-primary" />
@@ -56,7 +56,7 @@ function Dashboard() {
 
           <button
             onClick={() => setCurrentPage('sales')}
-            className="glass-card p-6 hover-lift text-left transition-all duration-200 hover:shadow-lg hover:border-primary/30 group"
+            className="glass-card p-6 text-left transition-all duration-200 hover:shadow-lg hover:border-primary/30 group"
           >
             <div className="w-12 h-12 rounded-lg bg-tertiary-container/10 flex items-center justify-center mb-4 group-hover:bg-tertiary-container/20 transition-colors duration-200">
               <TrendingUp className="h-6 w-6 text-tertiary" />
@@ -67,7 +67,7 @@ function Dashboard() {
 
           <button
             onClick={() => setCurrentPage('tickets')}
-            className="glass-card p-6 hover-lift text-left transition-all duration-200 hover:shadow-lg hover:border-primary/30 group"
+            className="glass-card p-6 text-left transition-all duration-200 hover:shadow-lg hover:border-primary/30 group"
           >
             <div className="w-12 h-12 rounded-lg bg-secondary/10 flex items-center justify-center mb-4 group-hover:bg-secondary/20 transition-colors duration-200">
               <Ticket className="h-6 w-6 text-secondary" />
@@ -78,7 +78,7 @@ function Dashboard() {
 
           <button
             onClick={() => setCurrentPage('agents')}
-            className="glass-card p-6 hover-lift text-left transition-all duration-200 hover:shadow-lg hover:border-primary/30 group"
+            className="glass-card p-6 text-left transition-all duration-200 hover:shadow-lg hover:border-primary/30 group"
           >
             <div className="w-12 h-12 rounded-lg bg-info/10 flex items-center justify-center mb-4 group-hover:bg-info/20 transition-colors duration-200">
               <Users className="h-6 w-6 text-info" />
@@ -89,7 +89,7 @@ function Dashboard() {
 
           <button
             onClick={() => setCurrentPage('master-dealers')}
-            className="glass-card p-6 hover-lift text-left transition-all duration-200 hover:shadow-lg hover:border-primary/30 group"
+            className="glass-card p-6 text-left transition-all duration-200 hover:shadow-lg hover:border-primary/30 group"
           >
             <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mb-4 group-hover:bg-accent/20 transition-colors duration-200">
               <Layers className="h-6 w-6 text-accent-foreground" />
@@ -99,7 +99,7 @@ function Dashboard() {
           </button>
 
           <button
-            className="glass-card p-6 hover-lift text-left transition-all duration-200 hover:shadow-lg hover:border-primary/30 group opacity-60"
+            className="glass-card p-6 text-left transition-all duration-200 hover:shadow-lg hover:border-primary/30 group opacity-60"
             disabled
           >
             <div className="w-12 h-12 rounded-lg bg-muted/10 flex items-center justify-center mb-4">

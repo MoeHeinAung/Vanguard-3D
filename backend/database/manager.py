@@ -78,6 +78,8 @@ class DatabaseManager:
                     value TEXT NOT NULL
                 )
             ''')
-            # Initialize default admin_hold if not exists
+            # Initialize default settings if not exists
             cursor.execute('INSERT OR IGNORE INTO settings (key, value) VALUES ("admin_hold", "5000")')
+            cursor.execute('INSERT OR IGNORE INTO settings (key, value) VALUES ("max_offload_amount", "10000")')
+            cursor.execute('INSERT OR IGNORE INTO settings (key, value) VALUES ("max_offload_ticket", "10")')
             conn.commit()

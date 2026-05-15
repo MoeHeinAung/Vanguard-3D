@@ -65,8 +65,8 @@ Adopt a design token-driven visual architecture:
 3. **Typography** – Load Inter (UI) and Space Mono (code) via Google Fonts, set as global defaults.
 
 4. **Component Updates** – All UI components updated to use new tokens:
-   - Buttons use gradient primary style with hover lift; secondary/outline/ghost variants get translucent glass treatments.
-   - Cards use `glass-card` with `hover-lift`.
+   - Buttons use gradient primary style; secondary/outline/ghost variants get translucent glass treatments.
+   - Cards use `glass-card`.
    - Inputs/Textareas gain semi-transparent background (`bg-background/60`) and `backdrop-blur-sm`.
    - Dialog uses `glass-card` styling for content.
    - Navbar uses `glass-navbar` and gradient brand title.

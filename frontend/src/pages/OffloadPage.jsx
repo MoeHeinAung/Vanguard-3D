@@ -3,46 +3,55 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { callPython } from '../utils/bridge';
-import { ChevronDown, ChevronRight, Building2, Plus, Search, Settings2, ShieldCheck } from 'lucide-react';
+import { 
+  ChevronDown, 
+  ChevronRight, 
+  ShieldAlert, 
+  Plus, 
+  Settings2, 
+  ShieldCheck, 
+  ArrowUpRight, 
+  FileOutput,
+  LayoutDashboard,
+  Filter
+} from 'lucide-react';
 
 const OffloadPage = () => {
-  const [dealers, setDealers] = useState([]);
   const [offloads, setOffloads] = useState([]);
   const [sales, setSales] = useState([]);
   const [draws, setDraws] = useState([]);
   const [selectedDraw, setSelectedDraw] = useState(null);
-  const [selectedDealer, setSelectedDealer] = useState(null);
+  
+  // Persistent Settings
   const [adminHold, setAdminHold] = useState(5000);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [maxOffloadAmount, setMaxOffloadAmount] = useState(10000);
+  const [maxOffloadTicket, setMaxOffloadTicket] = useState(10);
   
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [inputText, setInputText] = useState('');
-  const [notes, setNotes] = useState('');
+  // UI State
+  const [leftView, setLeftView] = useState('Pending'); // Holding, Pending, Offloaded
+  const [rightView, setRightView] = useState('Pending'); // Pending, Offloaded
   
-  const [activeTab, setActiveTab] = useState('Pending');
-  const [expandedGroups, setExpandedGroups] = useState({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20;
-
   const fetchData = async () => {
     try {
       const drawsData = await callPython('get_draws');
-      const dealersData = await callPython('get_master_dealers');
       const offloadsData = await callPython('get_offloads');
       const salesData = await callPython('get_sales');
+      
       const hold = await callPython('get_setting', 'admin_hold', '5000');
+      const maxAmt = await callPython('get_setting', 'max_offload_amount', '10000');
+      const maxTkt = await callPython('get_setting', 'max_offload_ticket', '10');
       
       const openDraw = drawsData.find(d => d.status === 'Open');
       setDraws(drawsData.filter(d => d.status === 'Open'));
-      setDealers(dealersData);
       setSelectedDraw(openDraw);
       setOffloads(offloadsData.filter(o => o.draw_id === openDraw?.id));
       setSales(salesData.filter(s => s.draw_id === openDraw?.id));
+      
       setAdminHold(Number(hold));
+      setMaxOffloadAmount(Number(maxAmt));
+      setMaxOffloadTicket(Number(maxTkt));
     } catch (error) {
       console.error('Failed to fetch offload data:', error);
     }
@@ -50,305 +59,182 @@ const OffloadPage = () => {
 
   useEffect(() => { fetchData(); }, []);
 
-  const handleHoldChange = async (val) => {
-    const newVal = Number(val);
-    setAdminHold(newVal);
-    await callPython('update_setting', 'admin_hold', newVal);
+  const handleSettingChange = async (key, val) => {
+    const numVal = Number(val);
+    if (key === 'admin_hold') setAdminHold(numVal);
+    if (key === 'max_offload_amount') setMaxOffloadAmount(numVal);
+    if (key === 'max_offload_ticket') setMaxOffloadTicket(numVal);
+    await callPython('update_setting', key, numVal);
   };
 
   const riskAggregates = useMemo(() => {
     const summary = {};
-    
-    // Aggregate Sales
     sales.forEach(s => {
       if (!summary[s.ticket]) summary[s.ticket] = { sales: 0, offloaded: 0 };
       summary[s.ticket].sales += s.amount;
     });
-
-    // Aggregate Offloads
     offloads.forEach(o => {
       if (!summary[o.ticket]) summary[o.ticket] = { sales: 0, offloaded: 0 };
       summary[o.ticket].offloaded += o.amount;
     });
 
     return Object.entries(summary).map(([ticket, data]) => {
-      const taken = Math.min(data.sales, adminHold);
+      const holding = Math.min(data.sales, adminHold);
       const pending = Math.max(data.sales - adminHold - data.offloaded, 0);
       return {
         ticket,
         sales: data.sales,
         offloaded: data.offloaded,
-        taken,
+        holding,
         pending
       };
     }).sort((a, b) => b.sales - a.sales);
   }, [sales, offloads, adminHold]);
 
-  const totals = useMemo(() => {
-    return riskAggregates.reduce((acc, curr) => ({
-      sales: acc.sales + curr.sales,
-      offloaded: acc.offloaded + curr.offloaded,
-      taken: acc.taken + curr.taken,
-      pending: acc.pending + curr.pending
-    }), { sales: 0, offloaded: 0, taken: 0, pending: 0 });
-  }, [riskAggregates]);
-
-  const filteredDealers = useMemo(() => {
-    return dealers.filter(d => d.name.toLowerCase().includes(searchTerm.toLowerCase()));
-  }, [dealers, searchTerm]);
-
-  const groupedOffloads = useMemo(() => {
-    const groups = {};
-    offloads.forEach(o => {
-      const key = o.created_at || 'Unknown';
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(o);
-    });
-    return Object.entries(groups).sort((a, b) => new Date(b[0]) - new Date(a[0]));
-  }, [offloads]);
-
-  const paginatedGroups = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return groupedOffloads.slice(start, start + itemsPerPage);
-  }, [groupedOffloads, currentPage]);
-
-  const handleSubmit = async () => {
-    if (!selectedDraw || !selectedDealer) return alert('Select Draw and Dealer');
-    try {
-      await callPython('create_offload', {
-        draw_id: selectedDraw.id,
-        master_dealer_id: selectedDealer.id,
-        input_text: inputText,
-        notes: notes
-      });
-      setInputText(''); 
-      setNotes(''); 
-      setIsDialogOpen(false);
-      await fetchData();
-    } catch (error) {
-      alert('Failed to record offload');
-    }
-  };
-
-  const tabs = [
-    { id: 'Pending', label: 'Pending (Risk)' },
-    { id: 'Taken', label: 'Taken (House)' },
-    { id: 'Ticket', label: 'All Tickets' },
-    { id: 'Offloaded', label: 'Offloaded' },
-    { id: 'History', label: 'Offload History' }
-  ];
+  const leftTableData = useMemo(() => {
+    if (leftView === 'Holding') return riskAggregates.filter(i => i.holding > 0);
+    if (leftView === 'Pending') return riskAggregates.filter(i => i.pending > 0);
+    if (leftView === 'Offloaded') return riskAggregates.filter(i => i.offloaded > 0);
+    return [];
+  }, [riskAggregates, leftView]);
 
   return (
-    <div className="h-full w-full flex flex-col bg-background text-foreground overflow-hidden">
-      {/* Top Bar: Configuration */}
-      <header className="flex-none p-4 border-b border-border bg-card/20 backdrop-blur-md flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold text-gradient uppercase tracking-widest">Risk Management</h1>
-          <div className="h-6 w-px bg-border/50" />
-          <div className="flex items-center gap-2">
-            <span className="badge-elegant badge-elegant-info">{selectedDraw?.draw_date || 'No Draw'}</span>
-          </div>
-        </div>
-
+    <div className="h-full w-full flex flex-col bg-background text-foreground overflow-hidden p-4 gap-4">
+      {/* 1. Top Control Bar */}
+      <header className="flex-none glass-card p-4 border-primary/10 flex items-center justify-between gap-6">
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3 bg-background/40 border border-border px-3 py-1.5 shadow-inner">
-            <Settings2 size={16} className="text-primary" />
-            <Label className="text-xs uppercase font-bold text-muted-foreground whitespace-nowrap">Admin Hold Limit</Label>
+          <div className="space-y-1.5">
+            <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Admin Hold Amount</Label>
             <Input 
               type="number" 
               value={adminHold} 
-              onChange={(e) => handleHoldChange(e.target.value)}
-              className="w-24 h-7 bg-transparent border-none focus-visible:ring-0 text-right font-mono text-primary font-bold"
+              onChange={(e) => handleSettingChange('admin_hold', e.target.value)}
+              className="h-9 w-32 bg-background/40 font-mono text-primary font-bold"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Max Offload Amount</Label>
+            <Input 
+              type="number" 
+              value={maxOffloadAmount} 
+              onChange={(e) => handleSettingChange('max_offload_amount', e.target.value)}
+              className="h-9 w-32 bg-background/40 font-mono text-cyan-400"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Max Offload Ticket</Label>
+            <Input 
+              type="number" 
+              value={maxOffloadTicket} 
+              onChange={(e) => handleSettingChange('max_offload_ticket', e.target.value)}
+              className="h-9 w-32 bg-background/40 font-mono text-amber-400"
             />
           </div>
         </div>
+
+        <div className="flex items-center gap-4">
+          <div className="h-10 w-px bg-border/50 mx-2" />
+          <Button className="btn-primary-gradient px-8 h-10 uppercase tracking-tighter font-black group">
+            <ArrowUpRight className="mr-2 h-4 w-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            Perform Offload
+          </Button>
+        </div>
       </header>
 
-      <main className="flex-1 flex min-h-0 overflow-hidden">
-        {/* Left Sidebar: Master Dealers */}
-        <aside className="w-80 flex-none border-r border-border bg-card/10 flex flex-col overflow-hidden">
-          <div className="flex-none p-4 space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-              <Input 
-                placeholder="Search dealers..." 
-                className="pl-9 h-9 bg-background/40"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="flex items-center justify-between text-xs font-bold uppercase text-muted-foreground tracking-tighter">
-              <span>Master Dealers</span>
-              <span>{filteredDealers.length} Available</span>
-            </div>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto scrollbar-thin px-2 space-y-1 pb-4">
-            {filteredDealers.map(dealer => (
+      <main className="flex-1 flex min-h-0 gap-4 overflow-hidden">
+        {/* 2. Left Main Table: Dynamic View */}
+        <section className="flex-1 flex flex-col glass-card overflow-hidden border-primary/5">
+          <div className="flex-none p-2 border-b border-border/30 flex gap-1 bg-white/5">
+            {['Holding', 'Pending', 'Offloaded'].map(view => (
               <button
-                key={dealer.id}
-                onClick={() => { setSelectedDealer(dealer); setIsDialogOpen(true); }}
-                className="w-full flex items-center gap-3 p-3 text-left transition-all hover:bg-primary/5 group relative border border-transparent hover:border-primary/10"
+                key={view}
+                onClick={() => setLeftView(view)}
+                className={`flex-1 py-2 text-[10px] uppercase font-black tracking-widest transition-all relative ${
+                  leftView === view ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:text-foreground'
+                }`}
               >
-                <div className="h-10 w-10 flex-none flex items-center justify-center bg-slate-900 border border-border group-hover:border-primary/30 transition-colors">
-                  <Building2 size={18} className="text-muted-foreground group-hover:text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold text-sm truncate group-hover:text-primary transition-colors">{dealer.name}</div>
-                  <div className="text-[10px] text-muted-foreground uppercase font-mono">{dealer.id}</div>
-                </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Plus size={16} className="text-primary" />
-                </div>
+                {view} View
+                {leftView === view && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary glow-sm" />}
               </button>
             ))}
           </div>
-        </aside>
 
-        {/* Right Content: Data Table */}
-        <section className="flex-1 flex flex-col bg-background/50 overflow-hidden">
-          <div className="flex-none p-4 pb-0 flex items-center justify-between bg-card/5 border-b border-border/30">
-            <div className="flex gap-1">
-              {tabs.map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`px-6 py-3 text-xs font-bold uppercase tracking-widest transition-all relative ${
-                    activeTab === tab.id 
-                    ? 'text-primary' 
-                    : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
-                  }`}
-                >
-                  {tab.label}
-                  {activeTab === tab.id && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary glow-accent" />
-                  )}
-                </button>
-              ))}
+          <div className="flex-1 overflow-y-auto scrollbar-thin">
+            <table className="data-table">
+              <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm shadow-sm">
+                <tr>
+                  <th className="w-16">#</th>
+                  <th>Ticket Number</th>
+                  <th className="text-right">
+                    {leftView === 'Holding' ? 'Held Amount' : 
+                     leftView === 'Pending' ? 'Pending Amount' : 'Offloaded Amount'}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {leftTableData.map((item, idx) => (
+                  <tr key={item.ticket} className="group">
+                    <td className="text-muted-foreground font-mono text-[10px]">{idx + 1}</td>
+                    <td className="font-mono font-bold text-sm tracking-widest">{item.ticket}</td>
+                    <td className="text-right font-mono font-bold text-primary">
+                      { (leftView === 'Holding' ? item.holding :
+                         leftView === 'Pending' ? item.pending : item.offloaded).toLocaleString() }
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="flex-none p-3 bg-primary/5 border-t border-primary/10 flex justify-between items-center">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-primary/70">Total {leftView}</span>
+            <span className="text-lg font-mono font-bold text-primary">
+              { leftTableData.reduce((acc, curr) => acc + (
+                leftView === 'Holding' ? curr.holding :
+                leftView === 'Pending' ? curr.pending : curr.offloaded
+              ), 0).toLocaleString() }
+            </span>
+          </div>
+        </section>
+
+        {/* 3. Right Preview Table: Export Template */}
+        <section className="w-[450px] flex flex-col glass-card overflow-hidden border-cyan-500/10">
+          <div className="flex-none p-4 border-b border-border/30 flex items-center justify-between bg-cyan-500/5">
+            <div className="flex items-center gap-2">
+              <FileOutput size={16} className="text-cyan-400" />
+              <h2 className="text-xs font-black uppercase tracking-widest text-cyan-400">Export Preview</h2>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <span className={`text-[10px] font-bold uppercase ${rightView === 'Pending' ? 'text-cyan-400' : 'text-muted-foreground'}`}>Pending</span>
+              <Switch 
+                checked={rightView === 'Offloaded'} 
+                onCheckedChange={(checked) => setRightView(checked ? 'Offloaded' : 'Pending')}
+              />
+              <span className={`text-[10px] font-bold uppercase ${rightView === 'Offloaded' ? 'text-cyan-400' : 'text-muted-foreground'}`}>Offloaded</span>
             </div>
           </div>
 
-          <div className="flex-1 min-h-0 p-4 overflow-hidden">
-            <Card className="glass-card flex flex-col h-full overflow-hidden">
-              <div className="flex-1 overflow-y-auto scrollbar-thin">
-                <table className="data-table">
-                  <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm">
-                    {activeTab === 'History' ? (
-                      <tr>
-                        <th className="w-10" />
-                        <th>Time</th>
-                        <th>Master Dealer</th>
-                        <th className="text-right">Tickets</th>
-                        <th className="text-right">Total</th>
-                      </tr>
-                    ) : (
-                      <tr>
-                        <th>Ticket #</th>
-                        <th className="text-right">
-                          {activeTab === 'Pending' ? 'Pending (Offload)' :
-                           activeTab === 'Taken' ? 'Taken (House)' :
-                           activeTab === 'Ticket' ? 'Total Sales' : 'Total Offloaded'}
-                        </th>
-                      </tr>
-                    )}
-                  </thead>
-                  <tbody>
-                    {activeTab === 'History' && paginatedGroups.map(([timestamp, group]) => {
-                      const isExpanded = expandedGroups[timestamp];
-                      const totalAmount = group.reduce((sum, o) => sum + o.amount, 0);
-                      return (
-                        <React.Fragment key={timestamp}>
-                          <tr className="cursor-pointer group" onClick={() => setExpandedGroups({...expandedGroups, [timestamp]: !isExpanded})}>
-                            <td>{isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</td>
-                            <td className="font-mono text-xs">{new Date(timestamp).toLocaleTimeString()}</td>
-                            <td className="font-bold">{group[0].master_dealer_name}</td>
-                            <td className="text-right font-mono">{group.length}</td>
-                            <td className="text-right font-mono text-primary font-bold">{totalAmount.toLocaleString()}</td>
-                          </tr>
-                          {isExpanded && group.map(o => (
-                            <tr key={o.id} className="bg-white/5 text-xs">
-                              <td />
-                              <td colSpan={2} className="text-muted-foreground italic pl-4">{o.notes || '—'}</td>
-                              <td className="text-right font-mono">{o.ticket}</td>
-                              <td className="text-right font-mono">{o.amount.toLocaleString()}</td>
-                            </tr>
-                          ))}
-                        </React.Fragment>
-                      );
-                    })}
-
-                    {activeTab !== 'History' && riskAggregates.map((item) => {
-                      const amount = activeTab === 'Pending' ? item.pending :
-                                     activeTab === 'Taken' ? item.taken :
-                                     activeTab === 'Ticket' ? item.sales : item.offloaded;
-                      
-                      if (activeTab === 'Pending' && amount === 0) return null;
-
-                      return (
-                        <tr key={item.ticket}>
-                          <td className="font-mono font-bold text-primary">{item.ticket}</td>
-                          <td className="text-right font-mono font-bold">
-                            {amount.toLocaleString()}
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+          <div className="flex-1 flex items-center justify-center bg-background/20 relative">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,247,255,0.03)_0,transparent_70%)]" />
+            <div className="text-center space-y-3 relative z-10 px-8">
+              <div className="h-12 w-12 rounded-full border border-dashed border-cyan-500/30 flex items-center justify-center mx-auto mb-4 bg-cyan-500/5">
+                <LayoutDashboard size={20} className="text-cyan-500/40" />
               </div>
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">Template Engine Standby</p>
+              <p className="text-[10px] leading-relaxed text-muted-foreground/40 max-w-[200px] mx-auto italic">
+                Export data for {rightView} tickets will appear here once logic is initialized.
+              </p>
+            </div>
+          </div>
 
-              {/* Total Row */}
-              <div className="flex-none border-t border-primary/20 bg-primary/5 p-4 flex justify-between items-center">
-                <div className="text-xs font-bold uppercase tracking-widest text-primary/70">Global risk Summary</div>
-                <div className="text-xl font-mono font-bold text-primary">
-                  { (activeTab === 'History' 
-                      ? groupedOffloads.reduce((acc, [_, g]) => acc + g.reduce((s, x) => s + x.amount, 0), 0)
-                      : (activeTab === 'Pending' ? totals.pending :
-                         activeTab === 'Taken' ? totals.taken :
-                         activeTab === 'Ticket' ? totals.sales : totals.offloaded)
-                    ).toLocaleString() }
-                </div>
-              </div>
-            </Card>
+          <div className="flex-none p-4 border-t border-border/30 bg-background/40">
+            <Button disabled variant="outline" className="w-full border-cyan-500/20 text-cyan-500/50 uppercase text-[10px] font-bold h-9">
+              Generate Export Template
+            </Button>
           </div>
         </section>
       </main>
-
-      {/* Offload Modal */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="glass-card border-primary/20 max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <ShieldCheck className="text-primary" size={20} />
-              <span>Record Offload: <span className="text-primary">{selectedDealer?.name}</span></span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6 pt-6">
-            <div className="space-y-3">
-              <Label className="text-xs uppercase font-bold text-muted-foreground tracking-widest">Risk Transfer Panel</Label>
-              <Textarea 
-                placeholder="Example: 123 = 5000" 
-                rows={10} 
-                className="bg-background/60 font-mono text-lg border-primary/10 focus:border-primary/40 transition-all"
-                value={inputText} 
-                onChange={(e) => setInputText(e.target.value)} 
-              />
-              <p className="text-[10px] text-muted-foreground uppercase text-center font-mono">Format: TICKET = AMOUNT per line</p>
-            </div>
-            <div className="space-y-2">
-              <Input 
-                placeholder="Offload batch reference/notes..." 
-                className="bg-background/40 h-10"
-                value={notes} 
-                onChange={(e) => setNotes(e.target.value)} 
-              />
-            </div>
-            <Button className="w-full btn-primary-gradient h-12 text-lg uppercase tracking-tighter font-black" onClick={handleSubmit}>
-              Confirm Risk Transfer
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

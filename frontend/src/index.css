@@ -229,8 +229,7 @@
   .transition-base { transition: all var(--transition-base) var(--ease-out); }
   .transition-slow { transition: all var(--transition-slow) var(--ease-out); }
 
-  .hover-lift:hover { @apply -translate-y-0.5; }
-  .hover-lift:active { @apply translate-y-0; }
+/* Removed hover-lift utilities */
 
   .text-gradient {
     background: linear-gradient(135deg, hsl(var(--brand-cyan-dim)), hsl(var(--brand-violet-dim)));

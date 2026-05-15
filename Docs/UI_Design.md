@@ -330,21 +330,12 @@ Decorative hairlines placed on **top-left** and **bottom-right** corners of prim
 
 ---
 
-## 8. Transitions & Animations
-
-### Transition Classes
+### Transitions
 
 ```html
 <div class="transition-fast">  <!-- 150ms ease-out --></div>
 <div class="transition-base"> <!-- 200ms ease-out --></div>
 <div class="transition-slow"> <!-- 300ms ease-out --></div>
-```
-
-### Hover Lift
-
-```css
-.hover-lift:hover { transform: translateY(-2px); }
-.hover-lift:active { transform: translateY(0); }
 ```
 
 ### Focus Ring
@@ -490,19 +481,22 @@ Used by: `DrawsPage`, `AgentsPage`, `MasterDealersPage`
 - Sidebar and Detail scroll independently.
 - Summary footers remain pinned.
 
-### Pattern B: Sales Engine Action Panel
+### Pattern B: Risk Management Dashboard
 
-Used by: `SalesPage`
+Used by: `OffloadPage`
 
 **Logic Model:**
-- **Admin Hold**: User-configurable numerical threshold.
-- **Taken**: `min(Total Amount, Admin Hold)`
-- **Pending**: `max(Total Amount - Admin Hold, 0)`
+- **Admin Hold**: Max liability per ticket.
+- **Max Offload Amount**: Upper limit for batch operations.
+- **Max Offload Ticket**: Max unique tickets per batch.
+- **Holding**: `min(Total, Admin Hold)`
+- **Pending**: `max(Total - Admin Hold - Offloaded, 0)`
 
 **Layout:**
-- Top: Configuration bar (Admin Hold input).
-- Left: Agent sidebar (triggering Sale Modal).
-- Right: Tabbed aggregation table with sticky header and pinned total footer.
+- **Control Bar**: Flex header with 3 numerical inputs and a primary action button.
+- **Dynamic Data Grid**: 2-column flex container.
+  - **Left (Main)**: Tabbed table with views for `Holding`, `Pending`, and `Offloaded` tickets.
+  - **Right (Preview)**: Toggle-driven container for template export preparation.
 
 ### Pattern C: Data Table
 
@@ -520,6 +514,15 @@ Standard table structure:
 ```
 
 **Numerical data:** Always use `font-mono` (Space Mono or monospace fallback) to prevent value jumping during real-time updates.
+
+### Pattern D: Sales Dashboard
+
+Used by: `SalesPage`
+
+**Layout:**
+- **Header**: Active draw context.
+- **Sidebar**: Interactive agent profiles with search and `+` sale shortcut.
+- **Detail**: Dynamic summary card + transaction history list.
 
 ### Navbar
 
