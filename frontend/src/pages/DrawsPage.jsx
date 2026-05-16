@@ -184,17 +184,17 @@ function DrawsPage({ onOpenReport }) {
               </CardHeader>
               <CardContent className="flex-1 space-y-6 overflow-y-auto scrollbar-thin pb-6">
                 <div className="grid grid-cols-2 gap-6">
-                  <div className="p-4 bg-surface-container/50 border border-border/30 rounded-none">
+                  <div className="p-4 bg-slate-900/50 border border-border/30 rounded-none">
                     <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cutoff Time</Label>
                     <p className="text-xl font-bold mt-1 font-mono">{selectedDraw.cutoff_time}</p>
                   </div>
-                  <div className="p-4 bg-surface-container/50 border border-border/30 rounded-none">
+                  <div className="p-4 bg-slate-900/50 border border-border/30 rounded-none">
                     <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Date Created</Label>
                     <p className="text-xl font-bold mt-1">{selectedDraw.created_at}</p>
                   </div>
                 </div>
 
-                <div className="p-4 bg-surface-container/50 border border-border/30 rounded-none">
+                <div className="p-4 bg-slate-900/50 border border-border/30 rounded-none">
                   <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Internal Notes</Label>
                   <p className="text-sm mt-1 text-muted-foreground whitespace-pre-wrap">
                     {selectedDraw.notes || 'No administrative notes for this draw.'}

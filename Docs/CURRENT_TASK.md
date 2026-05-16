@@ -1,8 +1,8 @@
 # Task ID
-TASK-005
+TASK-1.4
 ---
 # Title
-Risk Management (Offloading) Redesign
+Add Input Validation to Ticket Parsing
 ---
 # Status
 COMPLETED
@@ -11,42 +11,92 @@ COMPLETED
 HIGH
 ---
 # Type
-Feature
+Refactor
 ---
 # Goal
-Redesign the Risk Management page with a sidebar-main layout and implement a constrained offloading template system.
+Implement robust validation logic in the backend ticket parsers (`sale_service.py` and `offload_service.py`) to prevent negative, non-numeric, or out-of-bounds monetary values.
 ---
 # Scope
 ## Included
-- Reconfigure `OffloadPage.jsx` layout: Narrow sidebar (Pending list) and Wide main area (Template preview).
-- Implement "Perform Offload" logic:
-    - Limit by `Max Offload Amount` per ticket.
-    - Limit by `Max Offload Ticket` (batch size).
-    - Formula: `Offloaded = min(Pending, Max Offload Amount)`.
-- Implement Template UI:
-    - Header: "Kalaw", Draw Date, Page Number (auto-increment).
-    - Body: 4 horizontal tables of 15 records each (no headers, subtotal per table).
-    - Footer: "Total Amount Offloaded - [Sum] Ks".
-- Persistence: Record offloads in `offloaded_tickets` table via `create_offload`.
-- Automatic Image Export: Trigger PNG download using `html2canvas` upon successful offload.
-- History View: Sidebar toggle between "Ticket" and "History" views, with chronological pagination and batch re-preview capability.
+- Modify `parse_tickets` method in `backend/services/sale_service.py`.
+- Modify `parse_tickets` method in `backend/services/offload_service.py`.
+- Implement bounds validation (0 < amount < 1,000,000).
+- Implement error handling for non-numeric conversion.
 ## Excluded
-- Automatic (scheduled) offloading.
-- PDF/Print export.
+- UI-level input validation (though recommended, this task focuses on the backend parser integrity).
 ---
-# Validation Strategy
-- Verify transfer logic respects Max Amount/Ticket constraints.
-- Verify template layout (4 columns, 15 rows) fills correctly.
-- Ensure pending list recalculates after offload.
-- Verify page number incrementation.
-- Verify PNG export triggers upon offload and respects naming convention.
-- Verify History View groups records by timestamp and enables correct template re-preview.
+# Business Value
+- Prevents financial data corruption from malformed inputs.
+- Improves application stability by preventing runtime crashes during conversion.
+---
+# Related Features
+- Sale Management, Offload Management.
+---
+# Dependencies
+- None.
+---
+# Relevant Knowledge
+- Rules: api-robustness-rules.md
+---
+# Architectural Constraints
+- Validation must be silent (skip invalid lines) to maintain batch processing continuity.
+- Indentation must remain compliant with Python 4-space rules.
+---
+# Assumptions
+- Ticket input format is consistently "TICKET = AMOUNT".
+---
+# Risks
+- Misinterpretation of valid tickets that don't match the new strict criteria.
+---
+# Edge Cases
+- Empty lines, lines with missing "=", non-numeric amounts, negative amounts, amounts > 1M.
+---
+# Implementation Plan
+## Step 1
+Description:
+Locate `parse_tickets` in `backend/services/sale_service.py` and `backend/services/offload_service.py`.
+Expected Output:
+Identified target methods.
+Validation:
+- [x] Files located.
+---
+## Step 2
+Description:
+Implement try-except validation and range bounds (0 < amount < 1,000,000).
+Expected Output:
+Updated `parse_tickets` implementation in both files.
+Validation:
+- [x] Code properly inserted and indented (4 spaces).
+---
+## Step 3
+Description:
+Perform manual testing for edge cases (negative, non-numeric, zero, too large).
+Expected Output:
+Invalid inputs are correctly skipped.
+Validation:
+- [x] All test cases from plan pass.
+---
+# Files Expected To Change
+- backend/services/sale_service.py
+- backend/services/offload_service.py
+---
+# Testing Strategy
+## Manual Testing
+- Simulate invalid inputs and verify backend output.
+---
+# Acceptance Criteria
+- `parse_tickets` ignores invalid/out-of-bound inputs.
+- No system crashes on malformed data.
+- Range (0, 1M) is strictly enforced.
+---
+# Anti-Patterns
+- Crashing on `float()` conversion.
+- Accepting negative financial values.
+---
+# Rollback Plan
+- Revert changes to `sale_service.py` and `offload_service.py`.
 ---
 # Completion Notes
-- Redesigned `OffloadPage.jsx` with sidebar-main layout.
-- Implemented "Kalaw" template engine with 4x15 grid.
-- Integrated persistent settings for Page Number and Risk Constraints.
-- Verified real-time pending list recalculation.
-- Added automated image export via `html2canvas`.
-- Implemented History View with chronological pagination and re-preview logic.
-
+- Implemented robust input validation in `SaleService` and `OffloadService`.
+- Added try-except blocks and range checks (0 < x < 1,000,000).
+- Verified with manual edge-case tests.

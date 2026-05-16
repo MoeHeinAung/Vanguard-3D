@@ -11,11 +11,24 @@ class OffloadService:
         lines = input_text.strip().split('\n')
         for line in lines:
             if '=' in line:
-                ticket, amount = line.split('=')
+                parts = line.split('=')
+                if len(parts) != 2:
+                    continue
+                ticket, amount = parts
                 ticket = ticket.strip()
                 amount = amount.strip()
-                if ticket.isdigit() and len(ticket) == 3:
-                    offloads.append({'ticket': ticket, 'amount': float(amount)})
+                
+                if not (ticket.isdigit() and len(ticket) == 3):
+                    continue
+                
+                try:
+                    amount_val = float(amount)
+                    if amount_val <= 0 or amount_val > 1000000:
+                        continue
+                except (ValueError, TypeError):
+                    continue
+                
+                offloads.append({'ticket': ticket, 'amount': amount_val})
         return offloads
 
     def create_offload(self, draw_id, master_dealer_id, input_text, notes=None):

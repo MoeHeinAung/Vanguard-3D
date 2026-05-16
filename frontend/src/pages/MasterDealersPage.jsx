@@ -156,20 +156,20 @@ function MasterDealersPage() {
               </CardHeader>
               <CardContent className="flex-1 space-y-6 overflow-y-auto scrollbar-thin pb-6">
                 <div className="grid grid-cols-3 gap-4">
-                  <div className="p-3 bg-surface-container/50 border border-border/30 rounded-none">
+                  <div className="p-3 bg-slate-900/50 border border-border/30 rounded-none">
                     <Label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Commission</Label>
                     <p className="text-lg font-bold mt-1">{selectedDealer.commission}%</p>
                   </div>
-                  <div className="p-3 bg-surface-container/50 border border-border/30 rounded-none">
+                  <div className="p-3 bg-slate-900/50 border border-border/30 rounded-none">
                     <Label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">JP Factor</Label>
                     <p className="text-lg font-bold mt-1">{selectedDealer.jp_factor}</p>
                   </div>
-                  <div className="p-3 bg-surface-container/50 border border-border/30 rounded-none">
+                  <div className="p-3 bg-slate-900/50 border border-border/30 rounded-none">
                     <Label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">SP Factor</Label>
                     <p className="text-lg font-bold mt-1">{selectedDealer.sp_factor}</p>
                   </div>
                 </div>
-                <div className="p-3 bg-surface-container/50 border border-border/30 rounded-none">
+                <div className="p-3 bg-slate-900/50 border border-border/30 rounded-none">
                   <Label className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Notes</Label>
                   <p className="text-sm mt-1 text-muted-foreground whitespace-pre-wrap">{selectedDealer.notes || '—'}</p>
                 </div>
