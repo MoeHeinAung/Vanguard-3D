@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, BarChart3, TrendingUp, Shield, Ticket, Users, Layers } from 'lucide-react'
+import { LayoutDashboard, BarChart3, TrendingUp, Shield, Ticket, Users, Layers, PieChart } from 'lucide-react'
 
 function Navbar({ onNavigate, activePage }) {
   const navItems = [
@@ -8,6 +8,7 @@ function Navbar({ onNavigate, activePage }) {
     { id: 'sales', label: 'Sales', icon: TrendingUp },
     { id: 'offload', label: 'Risk Management', icon: Shield },
     { id: 'tickets', label: 'Tickets', icon: Ticket },
+    { id: 'report', label: 'Reports', icon: PieChart },
     { id: 'agents', label: 'Agents', icon: Users },
     { id: 'master-dealers', label: 'Dealers', icon: Layers },
   ]

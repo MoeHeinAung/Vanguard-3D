@@ -5,20 +5,28 @@ import TicketsPage from './pages/TicketsPage'
 import AgentsPage from './pages/AgentsPage'
 import MasterDealersPage from './pages/MasterDealersPage'
 import OffloadPage from './pages/OffloadPage'
+import ReportPage from './pages/ReportPage'
 import Navbar from './components/layout/Navbar'
-import { TrendingUp, BarChart3, Users, Ticket, Layers, Shield, Zap } from 'lucide-react'
+import { TrendingUp, BarChart3, Users, Ticket, Layers, Shield, Zap, PieChart } from 'lucide-react'
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home')
+  const [reportDrawId, setReportDrawId] = useState(null)
+
+  const handleNavigateToReport = (drawId) => {
+    setReportDrawId(drawId)
+    setCurrentPage('report')
+  }
 
   const renderPage = () => {
     switch (currentPage) {
-      case 'draws': return <DrawsPage />
+      case 'draws': return <DrawsPage onOpenReport={handleNavigateToReport} />
       case 'sales': return <SalesPage />
       case 'tickets': return <TicketsPage />
       case 'agents': return <AgentsPage />
       case 'master-dealers': return <MasterDealersPage />
       case 'offload': return <OffloadPage />
+      case 'report': return <ReportPage drawId={reportDrawId} onBack={() => setCurrentPage('draws')} />
       default: return <Dashboard onNavigate={setCurrentPage} />
     }
   }

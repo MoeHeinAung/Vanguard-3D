@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { callPython } from '../utils/bridge'
 import { Plus, Calendar, Clock, Flag, AlertCircle } from 'lucide-react'
 
-function DrawsPage() {
+function DrawsPage({ onOpenReport }) {
   const [draws, setDraws] = useState([])
   const [selectedDraw, setSelectedDraw] = useState(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -77,6 +77,8 @@ function DrawsPage() {
       });
       setIsWinnersModalOpen(false);
       setWinnersModalData({ ticket: '', type: 'Jackpot' });
+      // Trigger navigation to report
+      if (onOpenReport) onOpenReport(selectedDraw.id);
     } catch (error) {
       console.error('Failed to add winning ticket:', error);
     }
@@ -272,6 +274,18 @@ function DrawsPage() {
                 {selectedDraw.status === 'Closed' && (
                   <Button className="btn-primary-gradient w-full" size="lg">
                     Settle Draw &amp; Calculate Payouts
+                  </Button>
+                )}
+
+                {(selectedDraw.status === 'Closed' || selectedDraw.status === 'Settled') && (
+                  <Button 
+                    variant="outline" 
+                    className="w-full gap-2 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10" 
+                    size="lg"
+                    onClick={() => onOpenReport(selectedDraw.id)}
+                  >
+                    <BarChart3 className="h-5 w-5" />
+                    View Settlement Report
                   </Button>
                 )}
               </CardContent>
