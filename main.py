@@ -8,6 +8,7 @@ from backend.services.master_dealer_service import MasterDealerService
 from backend.services.sale_service import SaleService
 from backend.services.offload_service import OffloadService
 from backend.services.settings_service import SettingsService
+from backend.services.settlement_service import SettlementService
 
 class API:
     def __init__(self):
@@ -18,6 +19,7 @@ class API:
         self.sale_service = SaleService(self.db)
         self.offload_service = OffloadService(self.db)
         self.settings_service = SettingsService(self.db)
+        self.settlement_service = SettlementService(self.db)
 
     def hello(self):
         return "Hello from Python!"
@@ -166,6 +168,35 @@ class API:
             )
         except Exception as e:
             print(f"Error in create_offload: {e}", file=sys.stderr)
+            raise e
+
+    # Settlement
+    def add_blacklist_ticket(self, data):
+        try:
+            return self.settlement_service.add_blacklist_ticket(data['draw_id'], data['ticket'], data['type'])
+        except Exception as e:
+            print(f"Error in add_blacklist_ticket: {e}", file=sys.stderr)
+            raise e
+
+    def get_blacklist_tickets(self, draw_id=None):
+        try:
+            return self.settlement_service.get_blacklist_tickets(draw_id)
+        except Exception as e:
+            print(f"Error in get_blacklist_tickets: {e}", file=sys.stderr)
+            raise e
+
+    def add_winning_ticket(self, data):
+        try:
+            return self.settlement_service.add_winning_ticket(data['draw_id'], data['ticket'], data['type'])
+        except Exception as e:
+            print(f"Error in add_winning_ticket: {e}", file=sys.stderr)
+            raise e
+
+    def get_winning_tickets(self, draw_id=None):
+        try:
+            return self.settlement_service.get_winning_tickets(draw_id)
+        except Exception as e:
+            print(f"Error in get_winning_tickets: {e}", file=sys.stderr)
             raise e
 
 def main():
