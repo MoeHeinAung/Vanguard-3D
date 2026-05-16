@@ -169,6 +169,7 @@ class API:
             raise e
 
 def main():
+    webview.settings['ALLOW_DOWNLOADS'] = True
     api = API()
     # In development, we load the Vite dev server
     # In production, we would load the index.html from dist
