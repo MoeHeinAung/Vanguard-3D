@@ -317,8 +317,8 @@ const OffloadPage = () => {
         <main className="flex-1 bg-black/40 p-6 overflow-hidden flex flex-col items-center justify-center">
           {templateBatch.length > 0 ? (
             <div ref={templateRef} className="w-full h-full bg-white text-black p-10 shadow-2xl relative overflow-hidden flex flex-col">
-              {/* Paper Texture Overlay */}
-              <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/pinstriped-suit.png')]" />
+              {/* Paper Texture Removed to fix CORS export error */}
+              <div className="absolute inset-0 opacity-[0.03] pointer-events-none" />
               
               {/* Template Header */}
               <div className="flex justify-between items-baseline border-b-2 border-black pb-4 mb-6">
