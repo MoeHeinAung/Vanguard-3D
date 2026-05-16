@@ -22,6 +22,7 @@ const OffloadPage = () => {
   const [dealers, setDealers] = useState([]);
   const [selectedDraw, setSelectedDraw] = useState(null);
   const [selectedDealerId, setSelectedDealerId] = useState('');
+  const [blacklist, setBlacklist] = useState([]);
   
   const templateRef = useRef(null);
 
@@ -89,8 +90,12 @@ const OffloadPage = () => {
       setDealers(dealersData);
       if (dealersData.length > 0 && !selectedDealerId) setSelectedDealerId(dealersData[0].id);
       
-      setOffloads(offloadsData.filter(o => o.draw_id === openDraw?.id));
-      setSales(salesData.filter(s => s.draw_id === openDraw?.id));
+      if (openDraw) {
+        setOffloads(offloadsData.filter(o => o.draw_id === openDraw.id));
+        setSales(salesData.filter(s => s.draw_id === openDraw.id));
+        const blacklistData = await callPython('get_blacklist_tickets', openDraw.id);
+        setBlacklist(blacklistData);
+      }
       
       setAdminHold(Number(hold));
       setMaxOffloadAmount(Number(maxAmt));
@@ -127,18 +132,30 @@ const OffloadPage = () => {
       summary[o.ticket].offloaded += o.amount;
     });
 
+    const blockListMap = {};
+    blacklist.forEach(b => {
+      blockListMap[b.ticket] = b.type;
+    });
+
     return Object.entries(summary).map(([ticket, data]) => {
-      const holding = Math.min(data.sales, adminHold);
-      const pending = Math.max(data.sales - adminHold - data.offloaded, 0);
+      const isBlocked = blockListMap[ticket] === 'BLOCK';
+      
+      // If blocked, House holds NOTHING, all goes to pending
+      const effectiveAdminHold = isBlocked ? 0 : adminHold;
+      
+      const holding = Math.min(data.sales, effectiveAdminHold);
+      const pending = Math.max(data.sales - effectiveAdminHold - data.offloaded, 0);
+      
       return {
         ticket,
         sales: data.sales,
         offloaded: data.offloaded,
         holding,
-        pending
+        pending,
+        isBlocked
       };
     }).sort((a, b) => b.pending - a.pending); // Sort by most pending liability
-  }, [sales, offloads, adminHold]);
+  }, [sales, offloads, adminHold, blacklist]);
 
   const leftTableData = useMemo(() => {
     if (leftTab === 'Holding') return riskAggregates.filter(i => i.holding > 0);
