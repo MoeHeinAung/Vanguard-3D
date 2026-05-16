@@ -4,8 +4,9 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { callPython } from '../utils/bridge';
-import { Ticket, TrendingUp, Search, Info, ArrowUpRight } from 'lucide-react';
+import { Ticket, TrendingUp, Search, Info, ArrowUpRight, ShieldAlert, Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const TicketsPage = () => {
   const [sales, setSales] = useState([]);
@@ -13,6 +14,10 @@ const TicketsPage = () => {
   const [selectedDraw, setSelectedDraw] = useState(null);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  const [viewMode, setViewMode] = useState('top'); // top, blacklist, winning
+  const [blacklist, setBlacklist] = useState([]);
+  const [winners, setWinners] = useState([]);
 
   const fetchData = async () => {
     try {
@@ -20,8 +25,16 @@ const TicketsPage = () => {
       const salesData = await callPython('get_sales');
       setDraws(drawsData || []);
       const openDraw = drawsData?.find(d => d.status === 'Open');
-      setSelectedDraw(openDraw || (drawsData?.[0] || null));
+      const activeDraw = openDraw || (drawsData?.[0] || null);
+      setSelectedDraw(activeDraw);
       setSales(salesData || []);
+      
+      if (activeDraw) {
+        const blacklistData = await callPython('get_blacklist_tickets', activeDraw.id);
+        const winnersData = await callPython('get_winning_tickets', activeDraw.id);
+        setBlacklist(blacklistData);
+        setWinners(winnersData);
+      }
     } catch (error) {
       console.error("Failed to fetch ticket data:", error);
     }
@@ -103,47 +116,98 @@ const TicketsPage = () => {
       <div className="flex-1 flex overflow-hidden">
 
         {/* ── Ticket Totals (Master) ── */}
-        <section className="w-1/3 flex-none flex flex-col border-r border-border/40 bg-obsidian-950/20">
-          <div className="flex-none p-6 pb-2">
-            <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center gap-2">
-              <TrendingUp className="h-3 w-3 text-cyan-500" />
-              Top Performing Tickets
-            </h2>
+        <section className="w-1/4 flex-none flex flex-col border-r border-border/40 bg-obsidian-950/20">
+          <div className="flex-none p-4 pb-2">
+            <Select value={viewMode} onValueChange={setViewMode}>
+              <SelectTrigger className="w-full bg-obsidian-800/40 border-border/40 rounded-none h-10 text-[10px] uppercase font-bold tracking-[0.2em] text-cyan-400">
+                <SelectValue placeholder="VIEW MODE" />
+              </SelectTrigger>
+              <SelectContent className="bg-obsidian-900 border-border/40 rounded-none">
+                <SelectItem value="top" className="text-[10px] uppercase font-bold tracking-widest focus:bg-cyan-500/20 focus:text-cyan-400 cursor-pointer">Top Performing</SelectItem>
+                <SelectItem value="blacklist" className="text-[10px] uppercase font-bold tracking-widest focus:bg-cyan-500/20 focus:text-cyan-400 cursor-pointer">Blacklist</SelectItem>
+                <SelectItem value="winning" className="text-[10px] uppercase font-bold tracking-widest focus:bg-cyan-500/20 focus:text-cyan-400 cursor-pointer">Winning Tickets</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
+          
           <div className="flex-1 overflow-y-auto scrollbar-thin px-4 pb-6">
             <div className="space-y-1">
-              {ticketSummary.length === 0 ? (
-                <div className="py-12 text-center">
-                  <Info className="h-8 w-8 text-slate-700 mx-auto mb-2" />
-                  <p className="text-xs text-slate-500 uppercase tracking-widest">No matching tickets</p>
-                </div>
-              ) : (
-                ticketSummary.map(([ticket, amount]) => (
-                  <div
-                    key={ticket}
-                    onClick={() => setSelectedTicket(ticket)}
-                    className={cn(
-                      "group relative p-4 border border-border/20 cursor-pointer transition-all duration-200",
-                      selectedTicket === ticket
-                        ? "bg-cyan-500/5 border-cyan-500/40"
-                        : "hover:bg-white/5 hover:border-border/40"
-                    )}
-                  >
-                    {selectedTicket === ticket && (
-                      <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
-                    )}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-[10px] uppercase tracking-widest text-slate-500 group-hover:text-cyan-400 transition-colors">Ticket ID</p>
+              {viewMode === 'top' && (
+                ticketSummary.length === 0 ? (
+                  <div className="py-12 text-center">
+                    <Info className="h-8 w-8 text-slate-700 mx-auto mb-2" />
+                    <p className="text-xs text-slate-500 uppercase tracking-widest">No matching tickets</p>
+                  </div>
+                ) : (
+                  ticketSummary.map(([ticket, amount]) => (
+                    <div
+                      key={ticket}
+                      onClick={() => setSelectedTicket(ticket)}
+                      className={cn(
+                        "group relative p-4 border border-border/20 cursor-pointer transition-all duration-200",
+                        selectedTicket === ticket
+                          ? "bg-cyan-500/5 border-cyan-500/40"
+                          : "hover:bg-white/5 hover:border-border/40"
+                      )}
+                    >
+                      {selectedTicket === ticket && (
+                        <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.5)]" />
+                      )}
+                      <div className="flex items-center justify-between">
                         <p className="font-mono text-lg font-bold text-slate-200">{ticket}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[10px] uppercase tracking-widest text-slate-500">Revenue</p>
                         <p className="font-mono text-lg font-bold text-cyan-400">${amount.toLocaleString()}</p>
                       </div>
                     </div>
+                  ))
+                )
+              )}
+
+              {viewMode === 'blacklist' && (
+                blacklist.length === 0 ? (
+                  <div className="py-12 text-center">
+                    <ShieldAlert className="h-8 w-8 text-slate-700 mx-auto mb-2" />
+                    <p className="text-xs text-slate-500 uppercase tracking-widest">No blacklisted tickets</p>
                   </div>
-                ))
+                ) : (
+                  blacklist.filter(b => b.ticket.includes(searchTerm)).map((b) => (
+                    <div
+                      key={b.id}
+                      className="group relative p-4 border border-border/20 transition-all duration-200 bg-red-500/5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-mono text-lg font-bold text-slate-200">{b.ticket}</p>
+                          <p className="text-[9px] uppercase font-bold text-red-400 tracking-tighter">{b.type}</p>
+                        </div>
+                        <ShieldAlert className="h-4 w-4 text-red-500/40" />
+                      </div>
+                    </div>
+                  ))
+                )
+              )}
+
+              {viewMode === 'winning' && (
+                winners.length === 0 ? (
+                  <div className="py-12 text-center">
+                    <Trophy className="h-8 w-8 text-slate-700 mx-auto mb-2" />
+                    <p className="text-xs text-slate-500 uppercase tracking-widest">No winning tickets</p>
+                  </div>
+                ) : (
+                  winners.filter(w => w.ticket.includes(searchTerm)).map((w) => (
+                    <div
+                      key={w.id}
+                      className="group relative p-4 border border-border/20 transition-all duration-200 bg-amber-500/5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-mono text-lg font-bold text-slate-200">{w.ticket}</p>
+                          <p className="text-[9px] uppercase font-bold text-amber-400 tracking-tighter">{w.type}</p>
+                        </div>
+                        <Trophy className="h-4 w-4 text-amber-500/40" />
+                      </div>
+                    </div>
+                  ))
+                )
               )}
             </div>
           </div>
