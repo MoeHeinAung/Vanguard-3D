@@ -14,6 +14,7 @@ import {
   FileText,
   AlertCircle
 } from 'lucide-react';
+import { useNotification } from '@/context/NotificationContext';
 
 const OffloadPage = () => {
   const [offloads, setOffloads] = useState([]);
@@ -36,6 +37,8 @@ const OffloadPage = () => {
   const [leftTab, setLeftTab] = useState('Pending'); // Holding, Offloaded, Pending, History
   const [selectedHistoryId, setSelectedHistoryId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  
+  const { notifySuccess, notifyError } = useNotification();
   
   const historyData = useMemo(() => {
     const groups = {};
@@ -68,7 +71,7 @@ const OffloadPage = () => {
       link.click();
 
     } catch (error) {
-      console.error("Image export failed:", error);
+      notifyError(`Image export failed: ${error.message}`);
     }
   };
   
@@ -102,23 +105,28 @@ const OffloadPage = () => {
       setMaxOffloadTicket(Number(maxTkt));
       setPageNumber(Number(pgNum));
     } catch (error) {
-      console.error('Failed to fetch offload data:', error);
+      notifyError(`Failed to fetch offload data: ${error.message}`);
     }
   };
 
   useEffect(() => { fetchData(); }, []);
 
   const handleSettingChange = async (key, val) => {
-    const numVal = Number(val);
-    if (key === 'admin_hold') setAdminHold(numVal);
-    if (key === 'max_offload_amount') setMaxOffloadAmount(numVal);
-    if (key === 'max_offload_ticket') setMaxOffloadTicket(numVal);
-    
-    // Map internal key to DB key
-    const dbKey = key === 'page_number' ? 'offload_page_number' : key;
-    if (key === 'page_number') setPageNumber(numVal);
-    
-    await callPython('update_setting', dbKey, numVal);
+    try {
+      const numVal = Number(val);
+      if (key === 'admin_hold') setAdminHold(numVal);
+      if (key === 'max_offload_amount') setMaxOffloadAmount(numVal);
+      if (key === 'max_offload_ticket') setMaxOffloadTicket(numVal);
+      
+      // Map internal key to DB key
+      const dbKey = key === 'page_number' ? 'offload_page_number' : key;
+      if (key === 'page_number') setPageNumber(numVal);
+      
+      await callPython('update_setting', dbKey, numVal);
+      notifySuccess('Setting updated');
+    } catch (error) {
+      notifyError(`Failed to update setting: ${error.message}`);
+    }
   };
 
   const riskAggregates = useMemo(() => {

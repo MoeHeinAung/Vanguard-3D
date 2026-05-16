@@ -1,24 +1,3 @@
-Task 2.3: Create Reusable Entity Form Component
-🎯 Objective
-Eliminate UI code duplication between AgentsPage.jsx, MasterDealersPage.jsx, and future entity pages by creating a generic EntityForm component. This enforces design consistency and reduces maintenance overhead.
-📋 Prerequisites
-Completion of Task 1.1 (Create @/lib/utils)
-Access to /workspace/frontend/src/components/
-Understanding of React Props and State
-🏗️ Architecture Change
-Before: Each page implements its own form logic, inputs, and validation (~150 lines per page).
-After: A single configurable component handles all standard entity forms (~80 lines total).
-🚀 Step-by-Step Execution Plan
-Step 1: Verify UI Dependencies
-Ensure the required base components exist. If missing, create simple placeholders in /workspace/frontend/src/components/ui/:
-input.jsx
-label.jsx
-textarea.jsx
-button.jsx
-(Note: If your project uses Shadcn/UI or similar, these likely already exist.)
-Step 2: Create the Reusable Component
-Create /workspace/frontend/src/components/features/EntityForm.jsx:
-javascript
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
@@ -176,47 +155,3 @@ export default function EntityForm({
     </form>
   )
 }
-Step 3: Refactor AgentsPage.jsx
-Update /workspace/frontend/src/pages/AgentsPage.jsx:
-Import the new component:
-javascript
-import EntityForm from '@/components/features/EntityForm'
-Replace the existing form JSX (usually inside a modal or sidebar) with:
-javascript
-{isCreating || isEditing ? (
-  <EntityForm 
-    entityType="Agent"
-    initialData={selectedAgent} // Pass null for Create, object for Edit
-    onSubmit={handleFormSubmit}
-    onCancel={() => { setIsCreating(false); setSelectedAgent(null); }}
-    fields={['id', 'name', 'commission', 'jp_factor', 'sp_factor', 'notes']}
-  />
-) : (
-  // ... existing list view ...
-)}
-Update handleFormSubmit: Ensure it accepts the formData object passed by the component and maps it to your API call.
-Step 4: Refactor MasterDealersPage.jsx
-Repeat Step 3 for /workspace/frontend/src/pages/MasterDealersPage.jsx:
-Import EntityForm.
-Replace the duplicate form JSX with the component usage.
-Change entityType="Master Dealer".
-Pass selectedMasterDealer as initialData.
-Step 5: Verify Behavior
-Test both pages:
-Create Mode: Ensure ID field is editable, button says "Create".
-Edit Mode: Ensure ID field is disabled, existing data is populated, button says "Update".
-Validation: Ensure numeric fields only accept numbers.
-Cancel: Ensure form closes and state resets correctly.
-✅ Completion Checklist
-EntityForm.jsx created in components/features/
-AgentsPage.jsx refactored to use EntityForm
-MasterDealersPage.jsx refactored to use EntityForm
-Duplicate form HTML removed from both pages
-Create and Edit modes functioning correctly
-ID field properly disabled in Edit mode
-Visual styling consistent with existing design system
-💡 Benefits
-Consistency: All entity forms look and behave identically.
-Maintainability: Adding a new field (e.g., "email") requires changing only one file.
-Scalability: Creating a form for a new entity (e.g., "Retailers") takes minutes instead of hours.
-Bug Reduction: Fixes to validation or styling automatically apply to all forms.

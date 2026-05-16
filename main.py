@@ -97,6 +97,9 @@ class API:
     def delete_agent(self, agent_id):
         try:
             return self.agent_service.delete_agent(agent_id)
+        except ValueError as e:
+            print(f"Validation error in delete_agent: {e}", file=sys.stderr)
+            raise e
         except Exception as e:
             print(f"Error in delete_agent: {e}", file=sys.stderr)
             raise e
@@ -132,6 +135,9 @@ class API:
     def delete_master_dealer(self, md_id):
         try:
             return self.md_service.delete_master_dealer(md_id)
+        except ValueError as e:
+            print(f"Validation error in delete_master_dealer: {e}", file=sys.stderr)
+            raise e
         except Exception as e:
             print(f"Error in delete_master_dealer: {e}", file=sys.stderr)
             raise e

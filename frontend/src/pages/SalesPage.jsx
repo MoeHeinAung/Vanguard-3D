@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { callPython } from '../utils/bridge';
 import { ChevronDown, ChevronRight, TrendingUp, Plus, User, Search, Settings2 } from 'lucide-react';
+import { useNotification } from '@/context/NotificationContext';
 
 const SalesPage = () => {
   const [agents, setAgents] = useState([]);
@@ -28,6 +29,8 @@ const SalesPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
+  const { notifySuccess, notifyError } = useNotification();
+
   const fetchData = async () => {
     try {
       const drawsData = await callPython('get_draws');
@@ -42,16 +45,21 @@ const SalesPage = () => {
       setSales(salesData.filter(s => s.draw_id === openDraw?.id));
       setAdminHold(Number(hold));
     } catch (error) {
-      console.error('Fetch error:', error);
+      notifyError(`Failed to fetch sales data: ${error.message}`);
     }
   };
 
   useEffect(() => { fetchData(); }, []);
 
   const handleHoldChange = async (val) => {
-    const newVal = Number(val);
-    setAdminHold(newVal);
-    await callPython('update_setting', 'admin_hold', newVal);
+    try {
+      const newVal = Number(val);
+      setAdminHold(newVal);
+      await callPython('update_setting', 'admin_hold', newVal);
+      notifySuccess('Admin hold updated');
+    } catch (error) {
+      notifyError(`Failed to update setting: ${error.message}`);
+    }
   };
 
   const filteredSales = useMemo(() => {
@@ -104,15 +112,23 @@ const SalesPage = () => {
   }, [groupedSales, currentPage]);
 
   const handleSubmit = async () => {
-    if (!selectedDraw || !selectedAgent) return alert('Select Draw and Agent');
-    await callPython('create_sales', {
-      draw_id: selectedDraw.id,
-      agent_id: selectedAgent.id,
-      input_text: inputText,
-      notes: notes
-    });
-    setInputText(''); setNotes(''); setIsDialogOpen(false);
-    await fetchData();
+    if (!selectedDraw || !selectedAgent) {
+      notifyError('Select Draw and Agent first');
+      return;
+    }
+    try {
+      await callPython('create_sales', {
+        draw_id: selectedDraw.id,
+        agent_id: selectedAgent.id,
+        input_text: inputText,
+        notes: notes
+      });
+      notifySuccess('Sale recorded successfully');
+      setInputText(''); setNotes(''); setIsDialogOpen(false);
+      await fetchData();
+    } catch (error) {
+      notifyError(`Failed to record sale: ${error.message}`);
+    }
   };
 
   const tabs = [
@@ -135,7 +151,7 @@ const SalesPage = () => {
   return (
     <div className="h-full w-full flex flex-col bg-background text-foreground overflow-hidden">
       {/* Top Bar: Page Context */}
-      <header className="flex-none p-4 border-b border-border bg-card/20 backdrop-blur-md flex items-center justify-between">
+      <header className="flex-none p-4 glass-navbar border-b border-border bg-card/20 backdrop-blur-md flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h1 className="text-xl font-bold text-gradient uppercase tracking-widest">Sales Engine</h1>
           <div className="h-6 w-px bg-border/50" />
@@ -259,7 +275,7 @@ const SalesPage = () => {
             <Card className="glass-card flex flex-col h-full overflow-hidden">
               <div className="flex-1 overflow-y-auto scrollbar-thin">
                 <table className="data-table">
-                  <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm">
+                  <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm border-b border-border/30">
                     {activeTab === 'History' ? (
                       <tr>
                         <th className="w-10" />

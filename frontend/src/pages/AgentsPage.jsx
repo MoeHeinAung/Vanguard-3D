@@ -7,17 +7,18 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import EntityForm from '@/components/features/EntityForm'
 import { callPython } from '../utils/bridge'
 import { Plus, Trash2, Edit2, User } from 'lucide-react'
+import { useNotification } from '@/context/NotificationContext'
 
 function AgentsPage() {
   const [agents, setAgents] = useState([])
   const [selectedAgent, setSelectedAgent] = useState(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEdit, setIsEdit] = useState(false)
+  const { notifySuccess, notifyError } = useNotification()
 
   useEffect(() => { loadAgents() }, [])
 
@@ -26,7 +27,7 @@ function AgentsPage() {
       const data = await callPython('get_agents')
       setAgents(data)
     } catch (error) {
-      console.error('Failed to fetch agents:', error)
+      notifyError(`Failed to fetch agents: ${error.message}`)
     }
   }
 
@@ -34,15 +35,17 @@ function AgentsPage() {
     try {
       if (isEdit) {
         await callPython('update_agent', formData)
+        notifySuccess('Agent updated successfully')
       } else {
         await callPython('create_agent', formData)
+        notifySuccess('Agent created successfully')
       }
       setIsDialogOpen(false)
       loadAgents()
       setSelectedAgent(null)
       setIsEdit(false)
     } catch (error) {
-      console.error('Failed to save agent:', error)
+      notifyError(`Failed to save agent: ${error.message}`)
     }
   }
 
@@ -50,10 +53,11 @@ function AgentsPage() {
     if (confirm('Are you sure you want to delete this agent?')) {
       try {
         await callPython('delete_agent', id)
+        notifySuccess('Agent deleted successfully')
         loadAgents()
         setSelectedAgent(null)
       } catch (error) {
-        console.error('Failed to delete agent:', error)
+        notifyError(`Failed to delete agent: ${error.message}`)
       }
     }
   }
@@ -80,10 +84,12 @@ function AgentsPage() {
             <DialogHeader>
               <DialogTitle>{isEdit ? 'Edit Agent' : 'New Agent'}</DialogTitle>
             </DialogHeader>
-            <AgentForm
+            <EntityForm
+              entityType="Agent"
               initialData={isEdit ? selectedAgent : null}
               onSubmit={handleSaveAgent}
               onCancel={() => { setIsDialogOpen(false); setIsEdit(false); }}
+              fields={['id', 'name', 'commission', 'jp_factor', 'sp_factor', 'notes']}
             />
           </DialogContent>
         </Dialog>
@@ -181,58 +187,6 @@ function AgentsPage() {
             </Card>
           )}
         </div>
-      </div>
-    </div>
-  )
-}
-
-function AgentForm({ initialData, onSubmit, onCancel }) {
-  const [formData, setFormData] = useState(initialData || { id: '', name: '', commission: '', jp_factor: '', sp_factor: '', notes: '' })
-
-  return (
-    <div className="space-y-4 mt-4">
-      <div className="space-y-2">
-        <Label htmlFor="agent-id">Agent ID</Label>
-        <Input
-          id="agent-id"
-          placeholder="ID (3 chars)"
-          value={formData.id}
-          onChange={e => setFormData({...formData, id: e.target.value})}
-          disabled={!!initialData}
-          className="rounded-none"
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="agent-name">Name</Label>
-        <Input
-          id="agent-name"
-          placeholder="Full name"
-          value={formData.name}
-          onChange={e => setFormData({...formData, name: e.target.value})}
-          className="rounded-none"
-        />
-      </div>
-      <div className="grid grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="commission">Commission %</Label>
-          <Input id="commission" type="number" placeholder="0.0" value={formData.commission} onChange={e => setFormData({...formData, commission: e.target.value})} className="rounded-none" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="jp_factor">JP Factor</Label>
-          <Input id="jp_factor" type="number" placeholder="0.0" value={formData.jp_factor} onChange={e => setFormData({...formData, jp_factor: e.target.value})} className="rounded-none" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="sp_factor">SP Factor</Label>
-          <Input id="sp_factor" type="number" placeholder="0.0" value={formData.sp_factor} onChange={e => setFormData({...formData, sp_factor: e.target.value})} className="rounded-none" />
-        </div>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="notes">Notes</Label>
-        <Textarea id="notes" placeholder="Additional notes..." value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} className="rounded-none" />
-      </div>
-      <div className="flex justify-end gap-2 pt-4">
-        <Button variant="outline" onClick={onCancel}>Cancel</Button>
-        <Button onClick={() => onSubmit(formData)}>{initialData ? 'Update Agent' : 'Create Agent'}</Button>
       </div>
     </div>
   )

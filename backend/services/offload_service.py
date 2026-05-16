@@ -1,38 +1,26 @@
 import sqlite3
 from datetime import datetime
+from ..utils.ticket_parser import TicketParser
 
 class OffloadService:
     def __init__(self, db):
         self.db = db
 
-    def parse_tickets(self, input_text):
-        """Parses input format: '123 = 5000\n456 = 10000'"""
-        offloads = []
-        lines = input_text.strip().split('\n')
-        for line in lines:
-            if '=' in line:
-                parts = line.split('=')
-                if len(parts) != 2:
-                    continue
-                ticket, amount = parts
-                ticket = ticket.strip()
-                amount = amount.strip()
-                
-                if not (ticket.isdigit() and len(ticket) == 3):
-                    continue
-                
-                try:
-                    amount_val = float(amount)
-                    if amount_val <= 0 or amount_val > 1000000:
-                        continue
-                except (ValueError, TypeError):
-                    continue
-                
-                offloads.append({'ticket': ticket, 'amount': amount_val})
-        return offloads
+    def parse_tickets(self, input_text, notes=None):
+        """
+        Parses input text using the centralized TicketParser.
+        Returns a list of dictionaries ready for database insertion.
+        """
+        entries = TicketParser.parse(input_text, notes)
+        
+        # Convert dataclass objects to dictionaries for the service layer
+        return [
+            {'ticket': entry.ticket, 'amount': entry.amount, 'notes': entry.notes}
+            for entry in entries
+        ]
 
     def create_offload(self, draw_id, master_dealer_id, input_text, notes=None):
-        offload_data = self.parse_tickets(input_text)
+        offload_data = self.parse_tickets(input_text, notes)
         created_at = datetime.now().isoformat()
         
         with self.db.get_connection() as conn:
@@ -41,7 +29,7 @@ class OffloadService:
                 cursor.execute('''
                     INSERT INTO offloaded_tickets (draw_id, master_dealer_id, ticket, amount, notes, created_at)
                     VALUES (?, ?, ?, ?, ?, ?)
-                ''', (draw_id, master_dealer_id, offload['ticket'], offload['amount'], notes, created_at))
+                ''', (draw_id, master_dealer_id, offload['ticket'], offload['amount'], offload['notes'], created_at))
             conn.commit()
         return True
 

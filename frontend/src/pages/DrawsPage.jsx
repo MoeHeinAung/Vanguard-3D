@@ -13,6 +13,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { callPython } from '../utils/bridge'
 import { Plus, Calendar, Clock, Flag, AlertCircle } from 'lucide-react'
+import { useNotification } from '@/context/NotificationContext'
 
 function DrawsPage({ onOpenReport }) {
   const [draws, setDraws] = useState([])
@@ -26,6 +27,8 @@ function DrawsPage({ onOpenReport }) {
   const [blacklistForm, setBlacklistModalData] = useState({ ticket: '', type: 'HALF' })
   const [winnersForm, setWinnersModalData] = useState({ ticket: '', type: 'Jackpot' })
 
+  const { notifySuccess, notifyError } = useNotification()
+
   useEffect(() => {
     const loadDraws = async () => {
       try {
@@ -35,7 +38,7 @@ function DrawsPage({ onOpenReport }) {
           setSelectedDraw(data[0])
         }
       } catch (error) {
-        console.error('Failed to fetch draws:', error)
+        notifyError(`Failed to fetch draws: ${error.message}`)
       }
     }
     loadDraws()
@@ -44,11 +47,12 @@ function DrawsPage({ onOpenReport }) {
   const handleCreateDraw = async (formData) => {
     try {
       await callPython('create_draw', formData)
+      notifySuccess('Draw created successfully')
       setIsDialogOpen(false)
       const data = await callPython('get_draws')
       setDraws(data)
     } catch (error) {
-      console.error('Failed to create draw:', error)
+      notifyError(`Failed to create draw: ${error.message}`)
     }
   }
 
@@ -60,10 +64,11 @@ function DrawsPage({ onOpenReport }) {
         ticket: blacklistForm.ticket,
         type: blacklistForm.type
       });
+      notifySuccess('Ticket added to blacklist')
       setIsBlacklistModalOpen(false);
       setBlacklistModalData({ ticket: '', type: 'HALF' });
     } catch (error) {
-      console.error('Failed to add blacklist ticket:', error);
+      notifyError(`Failed to add blacklist ticket: ${error.message}`);
     }
   };
 
@@ -75,12 +80,13 @@ function DrawsPage({ onOpenReport }) {
         ticket: winnersForm.ticket,
         type: winnersForm.type
       });
+      notifySuccess('Winning ticket recorded')
       setIsWinnersModalOpen(false);
       setWinnersModalData({ ticket: '', type: 'Jackpot' });
       // Trigger navigation to report
       if (onOpenReport) onOpenReport(selectedDraw.id);
     } catch (error) {
-      console.error('Failed to add winning ticket:', error);
+      notifyError(`Failed to record winner: ${error.message}`);
     }
   };
 

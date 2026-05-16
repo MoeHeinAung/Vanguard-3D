@@ -1,40 +1,30 @@
-import sqlite3
+from .base_service import BaseEntityService
 
-class AgentService:
+class AgentService(BaseEntityService):
     def __init__(self, db_manager):
-        self.db = db_manager
+        super().__init__(db_manager, table_name='agents', id_field='id')
 
-    def get_all_agents(self):
-        with self.db.get_connection() as conn:
-            conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM agents ORDER BY created_at DESC')
-            return [dict(row) for row in cursor.fetchall()]
+    def get_all_agents(self, order_by='created_at DESC'):
+        return self.get_all(order_by=order_by)
 
     def create_agent(self, id, name, commission, jp_factor, sp_factor, notes=None):
-        with self.db.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                INSERT INTO agents (id, name, commission, jp_factor, sp_factor, notes)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ''', (id, name, commission, jp_factor, sp_factor, notes))
-            conn.commit()
-            return True
+        return self.create({
+            'id': id,
+            'name': name,
+            'commission': commission,
+            'jp_factor': jp_factor,
+            'sp_factor': sp_factor,
+            'notes': notes
+        })
 
     def update_agent(self, id, name, commission, jp_factor, sp_factor, notes=None):
-        with self.db.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('''
-                UPDATE agents 
-                SET name = ?, commission = ?, jp_factor = ?, sp_factor = ?, notes = ?
-                WHERE id = ?
-            ''', (name, commission, jp_factor, sp_factor, notes, id))
-            conn.commit()
-            return cursor.rowcount > 0
+        return self.update(id, {
+            'name': name,
+            'commission': commission,
+            'jp_factor': jp_factor,
+            'sp_factor': sp_factor,
+            'notes': notes
+        })
 
     def delete_agent(self, id):
-        with self.db.get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute('DELETE FROM agents WHERE id = ?', (id,))
-            conn.commit()
-            return cursor.rowcount > 0
+        return self.delete(id)

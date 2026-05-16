@@ -7,17 +7,18 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import EntityForm from '@/components/features/EntityForm'
 import { callPython } from '../utils/bridge'
 import { Plus, Trash2, Edit2, Building2 } from 'lucide-react'
+import { useNotification } from '@/context/NotificationContext'
 
 function MasterDealersPage() {
   const [dealers, setDealers] = useState([])
   const [selectedDealer, setSelectedDealer] = useState(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isEdit, setIsEdit] = useState(false)
+  const { notifySuccess, notifyError } = useNotification()
 
   useEffect(() => { loadDealers() }, [])
 
@@ -26,7 +27,7 @@ function MasterDealersPage() {
       const data = await callPython('get_master_dealers')
       setDealers(data)
     } catch (error) {
-      console.error('Failed to fetch master dealers:', error)
+      notifyError(`Failed to fetch master dealers: ${error.message}`)
     }
   }
 
@@ -34,15 +35,17 @@ function MasterDealersPage() {
     try {
       if (isEdit) {
         await callPython('update_master_dealer', formData)
+        notifySuccess('Dealer updated successfully')
       } else {
         await callPython('create_master_dealer', formData)
+        notifySuccess('Dealer created successfully')
       }
       setIsDialogOpen(false)
       loadDealers()
       setSelectedDealer(null)
       setIsEdit(false)
     } catch (error) {
-      console.error('Failed to save master dealer:', error)
+      notifyError(`Failed to save master dealer: ${error.message}`)
     }
   }
 
@@ -50,10 +53,11 @@ function MasterDealersPage() {
     if (confirm('Are you sure you want to delete this master dealer?')) {
       try {
         await callPython('delete_master_dealer', id)
+        notifySuccess('Dealer deleted successfully')
         loadDealers()
         setSelectedDealer(null)
       } catch (error) {
-        console.error('Failed to delete master dealer:', error)
+        notifyError(`Failed to delete master dealer: ${error.message}`)
       }
     }
   }
@@ -83,10 +87,12 @@ function MasterDealersPage() {
                 Enter the dealer details below to {isEdit ? 'update the existing record' : 'register a new master dealer'}.
               </DialogDescription>
             </DialogHeader>
-            <DealerForm
+            <EntityForm
+              entityType="Master Dealer"
               initialData={isEdit ? selectedDealer : null}
               onSubmit={handleSaveDealer}
               onCancel={() => { setIsDialogOpen(false); setIsEdit(false); }}
+              fields={['id', 'name', 'commission', 'jp_factor', 'sp_factor', 'notes']}
             />
           </DialogContent>
         </Dialog>
@@ -184,58 +190,6 @@ function MasterDealersPage() {
             </Card>
           )}
         </div>
-      </div>
-    </div>
-  )
-}
-
-function DealerForm({ initialData, onSubmit, onCancel }) {
-  const [formData, setFormData] = useState(initialData || { id: '', name: '', commission: '', jp_factor: '', sp_factor: '', notes: '' })
-
-  return (
-    <div className="space-y-4 mt-4">
-      <div className="space-y-2">
-        <Label htmlFor="dealer-id">Dealer ID</Label>
-        <Input
-          id="dealer-id"
-          placeholder="ID (3 chars)"
-          value={formData.id}
-          onChange={e => setFormData({...formData, id: e.target.value})}
-          disabled={!!initialData}
-          className="rounded-none"
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="dealer-name">Name</Label>
-        <Input
-          id="dealer-name"
-          placeholder="Full name"
-          value={formData.name}
-          onChange={e => setFormData({...formData, name: e.target.value})}
-          className="rounded-none"
-        />
-      </div>
-      <div className="grid grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="commission">Commission %</Label>
-          <Input id="commission" type="number" placeholder="0.0" value={formData.commission} onChange={e => setFormData({...formData, commission: e.target.value})} className="rounded-none" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="jp_factor">JP Factor</Label>
-          <Input id="jp_factor" type="number" placeholder="0.0" value={formData.jp_factor} onChange={e => setFormData({...formData, jp_factor: e.target.value})} className="rounded-none" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="sp_factor">SP Factor</Label>
-          <Input id="sp_factor" type="number" placeholder="0.0" value={formData.sp_factor} onChange={e => setFormData({...formData, sp_factor: e.target.value})} className="rounded-none" />
-        </div>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="notes">Notes</Label>
-        <Textarea id="notes" placeholder="Additional notes..." value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} className="rounded-none" />
-      </div>
-      <div className="flex justify-end gap-2 pt-4">
-        <Button variant="outline" onClick={onCancel}>Cancel</Button>
-        <Button onClick={() => onSubmit(formData)}>{initialData ? 'Update Dealer' : 'Create Dealer'}</Button>
       </div>
     </div>
   )

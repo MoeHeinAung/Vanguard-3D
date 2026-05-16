@@ -1,102 +1,120 @@
 # Task ID
-TASK-1.4
+TASK-2.4
 ---
 # Title
-Add Input Validation to Ticket Parsing
+Implement Centralized Notification System
 ---
 # Status
 COMPLETED
 ---
 # Priority
-HIGH
+MEDIUM
 ---
 # Type
-Refactor
+Refactor / Infrastructure
 ---
 # Goal
-Implement robust validation logic in the backend ticket parsers (`sale_service.py` and `offload_service.py`) to prevent negative, non-numeric, or out-of-bounds monetary values.
+Replace silent or console-based error handling with a unified, global toast notification system.
 ---
 # Scope
 ## Included
-- Modify `parse_tickets` method in `backend/services/sale_service.py`.
-- Modify `parse_tickets` method in `backend/services/offload_service.py`.
-- Implement bounds validation (0 < amount < 1,000,000).
-- Implement error handling for non-numeric conversion.
+- Create `frontend/src/context/NotificationContext.jsx`.
+- Add `animate-slide-in` to `frontend/src/index.css`.
+- Update `frontend/src/main.jsx` to wrap `App` in `NotificationProvider`.
+- Update core pages (`DrawsPage.jsx`, `AgentsPage.jsx`, `MasterDealersPage.jsx`, `SalesPage.jsx`, `OffloadPage.jsx`) to use the new hook.
 ## Excluded
-- UI-level input validation (though recommended, this task focuses on the backend parser integrity).
+- Changing existing API error handling logic beyond replacing `console.error` with `notifyError`.
 ---
 # Business Value
-- Prevents financial data corruption from malformed inputs.
-- Improves application stability by preventing runtime crashes during conversion.
+- Improved user feedback for success/failure states.
+- Standardized error handling across the application.
 ---
 # Related Features
-- Sale Management, Offload Management.
+- Sales Management, Offload Management, Agent/Dealer Management.
 ---
 # Dependencies
-- None.
+- `lucide-react` (installed via project dependencies)
 ---
 # Relevant Knowledge
-- Rules: api-robustness-rules.md
+- Task-2.4.md
+- UI Component Governance Rules
+- API Policy in SSOT.md
 ---
 # Architectural Constraints
-- Validation must be silent (skip invalid lines) to maintain batch processing continuity.
-- Indentation must remain compliant with Python 4-space rules.
+- Follow standard context provider pattern.
+- Animations must fit the modern-futuristic design system.
+- Notification component must be correctly z-indexed and viewport-pinned.
 ---
 # Assumptions
-- Ticket input format is consistently "TICKET = AMOUNT".
+- Application is wrapped at the top level in `main.jsx`.
+- Standardized `notifyError` and `notifySuccess` API.
 ---
 # Risks
-- Misinterpretation of valid tickets that don't match the new strict criteria.
+- Potential for z-index conflicts.
+- Notification state management overhead in complex async flows.
 ---
 # Edge Cases
-- Empty lines, lines with missing "=", non-numeric amounts, negative amounts, amounts > 1M.
+- Overlapping notifications.
+- Long error messages.
+- Browser notification permissions (not applicable to in-app toasts).
 ---
 # Implementation Plan
 ## Step 1
 Description:
-Locate `parse_tickets` in `backend/services/sale_service.py` and `backend/services/offload_service.py`.
+Create `NotificationContext.jsx` and add animation styles to `index.css`.
 Expected Output:
-Identified target methods.
+New context file and CSS rule.
 Validation:
-- [x] Files located.
+- [x] Context provider and hook exported.
+- [x] CSS animation rule present.
 ---
 ## Step 2
 Description:
-Implement try-except validation and range bounds (0 < amount < 1,000,000).
+Wrap `main.jsx` with `NotificationProvider`.
 Expected Output:
-Updated `parse_tickets` implementation in both files.
+App correctly wrapped.
 Validation:
-- [x] Code properly inserted and indented (4 spaces).
+- [x] Application starts without errors.
 ---
 ## Step 3
 Description:
-Perform manual testing for edge cases (negative, non-numeric, zero, too large).
+Integrate `useNotification` in critical pages (`DrawsPage`, `AgentsPage`, `MasterDealersPage`, `SalesPage`, `OffloadPage`).
 Expected Output:
-Invalid inputs are correctly skipped.
+Async handlers use `notifySuccess` and `notifyError`.
 Validation:
-- [x] All test cases from plan pass.
+- [x] `DrawsPage` updated.
+- [x] `AgentsPage` updated.
+- [x] `MasterDealersPage` updated.
+- [x] `SalesPage` updated.
+- [x] `OffloadPage` updated.
 ---
 # Files Expected To Change
-- backend/services/sale_service.py
-- backend/services/offload_service.py
+- frontend/src/context/NotificationContext.jsx (New)
+- frontend/src/index.css
+- frontend/src/main.jsx
+- frontend/src/pages/DrawsPage.jsx
+- frontend/src/pages/AgentsPage.jsx
+- frontend/src/pages/MasterDealersPage.jsx
+- frontend/src/pages/SalesPage.jsx
+- frontend/src/pages/OffloadPage.jsx
 ---
 # Testing Strategy
 ## Manual Testing
-- Simulate invalid inputs and verify backend output.
+- Trigger success/failure scenarios in each refactored page.
 ---
 # Acceptance Criteria
-- `parse_tickets` ignores invalid/out-of-bound inputs.
-- No system crashes on malformed data.
-- Range (0, 1M) is strictly enforced.
+- Global notification system active.
+- Toasts appear and disappear within expected timeframe.
+- Actions provide immediate user feedback.
 ---
 # Anti-Patterns
-- Crashing on `float()` conversion.
-- Accepting negative financial values.
+- Silent error handling.
+- Duplicating notification logic in every page.
 ---
 # Rollback Plan
-- Revert changes to `sale_service.py` and `offload_service.py`.
+- Revert changes to `main.jsx`, remove context provider and related files.
 ---
 # Completion Notes
-- Implemented robust input validation in `SaleService` and `OffloadService`.
-- Added try-except blocks and range checks (0 < x < 1,000,000).
-- Verified with manual edge-case tests.
+- Implemented `NotificationContext` with `notifySuccess`, `notifyError`, and `notifyWarning` methods.
+- Integrated the notification system into the global app state via `NotificationProvider`.
+- Refactored core pages (`DrawsPage`, `AgentsPage`, `MasterDealersPage`, `SalesPage`, `OffloadPage`) to use `useNotification` for standardized user feedback, successfully replacing silent `console.error` logs.
