@@ -32,7 +32,8 @@ const OffloadPage = () => {
   const [pageNumber, setPageNumber] = useState(1);
   
   // UI State
-  const [leftTab, setLeftTab] = useState('Pending'); // Holding, Offloaded, Pending
+  const [leftTab, setLeftTab] = useState('Pending'); // Holding, Offloaded, Pending, History
+  const [selectedHistoryId, setSelectedHistoryId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   
   const downloadTemplateAsImage = async () => {
@@ -255,7 +256,7 @@ const OffloadPage = () => {
         {/* SIDEBAR: Data Tables (Narrow) */}
         <aside className="w-80 flex-none border-r border-white/5 flex flex-col overflow-hidden bg-black/20">
           <div className="flex-none p-1 border-b border-white/5 bg-white/5 flex gap-1">
-            {['Holding', 'Offloaded', 'Pending'].map(tab => (
+            {['Holding', 'Offloaded', 'Pending', 'History'].map(tab => (
               <button
                 key={tab}
                 onClick={() => setLeftTab(tab)}
@@ -270,37 +271,64 @@ const OffloadPage = () => {
           </div>
 
           <div className="flex-1 overflow-y-auto scrollbar-thin">
-            <table className="w-full text-left border-collapse">
-              <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm border-b border-white/5">
-                <tr>
-                  <th className="p-2 text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider pl-4">Ticket</th>
-                  <th className="p-2 text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider text-right pr-4">
-                    {leftTab === 'Holding' ? 'Held' : leftTab === 'Offloaded' ? 'Offloaded' : 'Pending'}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.02]">
-                {leftTableData.length > 0 ? (
-                  leftTableData.map((item) => (
-                    <tr key={item.ticket} className="hover:bg-white/[0.02] transition-colors group">
-                      <td className="p-2 py-2.5 font-mono text-xs font-bold tracking-widest pl-4 group-hover:text-primary transition-colors">{item.ticket}</td>
-                      <td className="p-2 py-2.5 text-right font-mono text-xs font-bold text-primary pr-4">
-                        {(leftTab === 'Holding' ? item.holding : leftTab === 'Offloaded' ? item.offloaded : item.pending).toLocaleString()}
+            {leftTab === 'History' ? (
+              <table className="w-full text-left border-collapse">
+                <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm border-b border-white/5">
+                  <tr>
+                    <th className="p-2 text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider pl-4">Time</th>
+                    <th className="p-2 text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider text-right pr-4">Total</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/[0.02]">
+                  {historyData.map((h) => (
+                    <tr 
+                      key={h.created_at} 
+                      onClick={() => setSelectedHistoryId(h.created_at)}
+                      className={`cursor-pointer hover:bg-white/[0.05] transition-colors ${selectedHistoryId === h.created_at ? 'bg-primary/10' : ''}`}
+                    >
+                      <td className="p-2 py-2.5 font-mono text-[10px] font-bold pl-4">
+                        {new Date(h.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </td>
+                      <td className="p-2 py-2.5 text-right font-mono text-[10px] font-bold pr-4">
+                        {h.tickets.reduce((sum, t) => sum + t.amount, 0).toLocaleString()}
                       </td>
                     </tr>
-                  ))
-                ) : (
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <table className="w-full text-left border-collapse">
+                <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm border-b border-white/5">
                   <tr>
-                    <td colSpan={2} className="p-8 text-center">
-                      <div className="flex flex-col items-center gap-2 opacity-20">
-                        <AlertCircle size={24} />
-                        <span className="text-[10px] uppercase font-bold tracking-widest">No {leftTab} Data</span>
-                      </div>
-                    </td>
+                    <th className="p-2 text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider pl-4">Ticket</th>
+                    <th className="p-2 text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider text-right pr-4">
+                      {leftTab === 'Holding' ? 'Held' : leftTab === 'Offloaded' ? 'Offloaded' : 'Pending'}
+                    </th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-white/[0.02]">
+                  {leftTableData.length > 0 ? (
+                    leftTableData.map((item) => (
+                      <tr key={item.ticket} className="hover:bg-white/[0.02] transition-colors group">
+                        <td className="p-2 py-2.5 font-mono text-xs font-bold tracking-widest pl-4 group-hover:text-primary transition-colors">{item.ticket}</td>
+                        <td className="p-2 py-2.5 text-right font-mono text-xs font-bold text-primary pr-4">
+                          {(leftTab === 'Holding' ? item.holding : leftTab === 'Offloaded' ? item.offloaded : item.pending).toLocaleString()}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={2} className="p-8 text-center">
+                        <div className="flex flex-col items-center gap-2 opacity-20">
+                          <AlertCircle size={24} />
+                          <span className="text-[10px] uppercase font-bold tracking-widest">No {leftTab} Data</span>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
 
           <div className="flex-none p-4 bg-primary/5 border-t border-white/5">
