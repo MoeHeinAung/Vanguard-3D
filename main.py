@@ -68,11 +68,32 @@ class API:
             print(f"Error in create_draw: {e}", file=sys.stderr)
             raise e
     
+    def update_status(self, draw_id, new_status):
+        try:
+            return self.draw_service.update_status(draw_id, new_status)
+        except Exception as e:
+            print(f"Error in update_status: {e}", file=sys.stderr)
+            raise e
+
     def settle_draw(self, draw_id):
         try:
             return self.draw_service.settle_draw(draw_id)
         except Exception as e:
             print(f"Error in settle_draw: {e}", file=sys.stderr)
+            raise e
+
+    def edit_draw(self, draw_id, data):
+        try:
+            return self.draw_service.edit_draw(draw_id, data)
+        except Exception as e:
+            print(f"Error in edit_draw: {e}", file=sys.stderr)
+            raise e
+
+    def delete_draw(self, draw_id):
+        try:
+            return self.draw_service.delete_draw(draw_id)
+        except Exception as e:
+            print(f"Error in delete_draw: {e}", file=sys.stderr)
             raise e
 
     # Agents

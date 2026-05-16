@@ -12,13 +12,15 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { callPython } from '../utils/bridge'
-import { Plus, Calendar, Clock, Flag, AlertCircle } from 'lucide-react'
+import { Plus, Calendar, Clock, Flag, AlertCircle, BarChart3 } from 'lucide-react'
 import { useNotification } from '@/context/NotificationContext'
 
 function DrawsPage({ onOpenReport }) {
   const [draws, setDraws] = useState([])
   const [selectedDraw, setSelectedDraw] = useState(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isEditMode, setIsEditMode] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   
   // Settlement Modals
   const [isBlacklistModalOpen, setIsBlacklistModalOpen] = useState(false)
@@ -36,23 +38,47 @@ function DrawsPage({ onOpenReport }) {
         setDraws(data)
         if (data.length > 0 && !selectedDraw) {
           setSelectedDraw(data[0])
+        } else if (selectedDraw) {
+          // Update selected draw details
+          const updated = data.find(d => d.id === selectedDraw.id)
+          setSelectedDraw(updated || null)
         }
       } catch (error) {
         notifyError(`Failed to fetch draws: ${error.message}`)
       }
     }
     loadDraws()
-  }, [selectedDraw])
+  }, []) // Remove [selectedDraw] dependency to avoid infinite loop
 
   const handleCreateDraw = async (formData) => {
     try {
-      await callPython('create_draw', formData)
-      notifySuccess('Draw created successfully')
+      if (isEditMode) {
+        await callPython('edit_draw', { draw_id: selectedDraw.id, data: formData })
+        notifySuccess('Draw updated successfully')
+      } else {
+        await callPython('create_draw', formData)
+        notifySuccess('Draw created successfully')
+      }
       setIsDialogOpen(false)
+      setIsEditMode(false)
       const data = await callPython('get_draws')
       setDraws(data)
+      setSelectedDraw(data.find(d => d.id === (isEditMode ? selectedDraw.id : data[0].id)))
     } catch (error) {
-      notifyError(`Failed to create draw: ${error.message}`)
+      notifyError(`Failed to ${isEditMode ? 'update' : 'create'} draw: ${error.message}`)
+    }
+  }
+
+  const handleDeleteDraw = async () => {
+    try {
+      await callPython('delete_draw', selectedDraw.id)
+      notifySuccess('Draw deleted successfully')
+      setIsDeleteDialogOpen(false)
+      const data = await callPython('get_draws')
+      setDraws(data)
+      setSelectedDraw(data.length > 0 ? data[0] : null)
+    } catch (error) {
+      notifyError(`Failed to delete draw: ${error.message}`)
     }
   }
 
@@ -90,6 +116,16 @@ function DrawsPage({ onOpenReport }) {
     }
   };
 
+  const handleEditClick = () => {
+    setIsEditMode(true)
+    setIsDialogOpen(true)
+  }
+
+  const handleNewClick = () => {
+    setIsEditMode(false)
+    setIsDialogOpen(true)
+  }
+
   const getStatusVariant = (status) => {
     switch (status) {
       case 'Open': return 'success'
@@ -113,19 +149,20 @@ function DrawsPage({ onOpenReport }) {
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2" onClick={() => setIsDialogOpen(true)}>
+            <Button className="gap-2" onClick={handleNewClick}>
               <Plus className="h-4 w-4" />
               New Draw
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>New Lottery Draw</DialogTitle>
-              <DialogDescription>
-                Define the draw date and cutoff time to initialize a new lottery session.
-              </DialogDescription>
+              <DialogTitle>{isEditMode ? 'Edit Draw' : 'New Lottery Draw'}</DialogTitle>
             </DialogHeader>
-            <DrawForm onSubmit={handleCreateDraw} onCancel={() => setIsDialogOpen(false)} />
+            <DrawForm 
+              initialData={isEditMode ? selectedDraw : null}
+              onSubmit={handleCreateDraw} 
+              onCancel={() => setIsDialogOpen(false)} 
+            />
           </DialogContent>
         </Dialog>
       </div>
@@ -182,15 +219,60 @@ function DrawsPage({ onOpenReport }) {
                   <Flag className="h-5 w-5 text-primary" />
                   Draw Information
                 </CardTitle>
-                <Badge
-                  variant={
-                    selectedDraw.status === 'Open' ? 'success' :
-                    selectedDraw.status === 'Closed' ? 'warning' : 'info'
-                  }
-                >
-                  {selectedDraw.status}
-                </Badge>
+                  <div className="flex items-center gap-2">
+                    {selectedDraw.status !== 'Settled' && (
+                      <select 
+                        className="bg-background border border-border p-1 rounded-none text-xs"
+                        value={selectedDraw.status}
+                        onChange={async (e) => {
+                          try {
+                            await callPython('update_status', selectedDraw.id, e.target.value)
+                            notifySuccess('Status updated')
+                            const data = await callPython('get_draws')
+                            setDraws(data)
+                            setSelectedDraw(data.find(d => d.id === selectedDraw.id))
+                          } catch (err) {
+                            notifyError(`Update failed: ${err.message}`)
+                          }
+                        }}
+                      >
+                        <option value="Open">Open</option>
+                        <option value="Closed">Closed</option>
+                      </select>
+                    )}
+                    {selectedDraw.status === 'Settled' && (
+                      <Badge variant="info">Settled</Badge>
+                    )}
+                    
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleEditClick}>
+                        <span className="sr-only">Edit</span>
+                        ✏️
+                      </Button>
+                      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-destructive">
+                            <span className="sr-only">Delete</span>
+                            🗑️
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                          <DialogHeader>
+                            <DialogTitle>Confirm Deletion</DialogTitle>
+                            <DialogDescription>
+                              Are you sure you want to delete draw {selectedDraw.draw_date}? This action cannot be undone.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="flex justify-end gap-2 pt-4">
+                            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>Cancel</Button>
+                            <Button variant="destructive" onClick={handleDeleteDraw}>Delete</Button>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </div>
+                  </div>
               </CardHeader>
+
               <CardContent className="flex-1 space-y-6 overflow-y-auto scrollbar-thin pb-6">
                 <div className="grid grid-cols-2 gap-6">
                   <div className="p-4 bg-slate-900/50 border border-border/30 rounded-none">
@@ -313,16 +395,15 @@ function DrawsPage({ onOpenReport }) {
   )
 }
 
-function DrawForm({ onSubmit, onCancel }) {
+function DrawForm({ initialData, onSubmit, onCancel }) {
   const [formData, setFormData] = useState({
-    draw_date: '',
-    cutoff_time: '',
-    notes: ''
+    draw_date: initialData?.draw_date || '',
+    cutoff_time: initialData?.cutoff_time || '',
+    notes: initialData?.notes || ''
   })
 
   const handleSubmit = () => {
     onSubmit(formData)
-    setFormData({ draw_date: '', cutoff_time: '', notes: '' })
   }
 
   return (
@@ -367,7 +448,7 @@ function DrawForm({ onSubmit, onCancel }) {
 
       <div className="flex justify-end gap-2 pt-4">
         <Button variant="outline" onClick={onCancel}>Cancel</Button>
-        <Button onClick={handleSubmit}>Initialize Draw</Button>
+        <Button onClick={handleSubmit}>{initialData ? 'Update Draw' : 'Initialize Draw'}</Button>
       </div>
     </div>
   )

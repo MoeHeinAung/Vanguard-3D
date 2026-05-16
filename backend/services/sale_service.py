@@ -1,10 +1,12 @@
 import sqlite3
 from datetime import datetime
-from ..utils.ticket_parser import TicketParser
+from backend.utils.ticket_parser import TicketParser
+from backend.repositories.draw_repository import DrawRepository
 
 class SaleService:
-    def __init__(self, db):
+    def __init__(self, db, draw_repo: DrawRepository = None):
         self.db = db
+        self.draw_repo = draw_repo
 
     def parse_tickets(self, input_text, notes=None):
         """
@@ -20,6 +22,11 @@ class SaleService:
         ]
 
     def create_sales(self, draw_id, agent_id, input_text, notes=None):
+        if self.draw_repo:
+            draw = self.draw_repo.find_by_id(draw_id)
+            if not draw or draw.get('status') != 'Open':
+                raise ValueError("Cannot add sales to a closed or settled draw.")
+
         sales_data = self.parse_tickets(input_text, notes)
         created_at = datetime.now().isoformat()
         

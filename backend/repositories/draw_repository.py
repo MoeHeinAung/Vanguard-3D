@@ -73,6 +73,17 @@ class DrawRepository(BaseRepository):
             print(f"Error in DrawRepository.delete: {e}", file=sys.stderr)
             raise e
 
+    def get_open_draw_count(self) -> int:
+        """Returns the number of draws that are currently 'Open'."""
+        try:
+            with self.db.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute(f"SELECT COUNT(*) FROM {self.table_name} WHERE status = 'Open'")
+                return cursor.fetchone()[0]
+        except Exception as e:
+            print(f"Error in DrawRepository.get_open_draw_count: {e}", file=sys.stderr)
+            raise e
+
     def update_draw_status(self, draw_id: int, status: str) -> bool:
         """Specific method to update draw status."""
         try:

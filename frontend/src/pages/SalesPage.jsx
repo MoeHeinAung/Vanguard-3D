@@ -280,6 +280,7 @@ const SalesPage = () => {
                       <tr>
                         <th className="w-10" />
                         <th>Time</th>
+                        <th>Draw Date</th>
                         <th>Agent</th>
                         <th className="text-right">Tickets</th>
                         <th className="text-right">Total</th>
@@ -300,6 +301,7 @@ const SalesPage = () => {
                           <tr className="cursor-pointer group" onClick={() => setExpandedGroups({...expandedGroups, [timestamp]: !isExpanded})}>
                             <td>{isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</td>
                             <td className="font-mono text-xs">{new Date(timestamp).toLocaleTimeString()}</td>
+                            <td className="font-mono text-xs">{group[0].draw_date}</td>
                             <td className="font-bold">{group[0].agent_name}</td>
                             <td className="text-right font-mono">{group.length}</td>
                             <td className="text-right font-mono text-primary font-bold">{totalAmount.toLocaleString()}</td>
