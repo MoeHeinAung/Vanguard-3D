@@ -199,6 +199,13 @@ class API:
             print(f"Error in get_winning_tickets: {e}", file=sys.stderr)
             raise e
 
+    def calculate_settlement(self, draw_id):
+        try:
+            return self.settlement_service.calculate_settlement(draw_id)
+        except Exception as e:
+            print(f"Error in calculate_settlement: {e}", file=sys.stderr)
+            raise e
+
 def main():
     webview.settings['ALLOW_DOWNLOADS'] = True
     api = API()
