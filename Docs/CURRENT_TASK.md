@@ -1,120 +1,109 @@
 # Task ID
-TASK-2.4
+TASK-3.4
 ---
 # Title
-Implement Centralized Notification System
+Add Integration Testing Framework
 ---
 # Status
-COMPLETED
+PLANNING
 ---
 # Priority
-MEDIUM
+HIGH
 ---
 # Type
-Refactor / Infrastructure
+Testing / QA
 ---
 # Goal
-Replace silent or console-based error handling with a unified, global toast notification system.
+Establish a robust automated testing suite using `pytest` to prevent regressions and validate critical financial logic.
 ---
 # Scope
 ## Included
-- Create `frontend/src/context/NotificationContext.jsx`.
-- Add `animate-slide-in` to `frontend/src/index.css`.
-- Update `frontend/src/main.jsx` to wrap `App` in `NotificationProvider`.
-- Update core pages (`DrawsPage.jsx`, `AgentsPage.jsx`, `MasterDealersPage.jsx`, `SalesPage.jsx`, `OffloadPage.jsx`) to use the new hook.
+- Install `pytest` and `pytest-cov`.
+- Configure `pytest.ini`.
+- Create `backend/tests/` structure and `conftest.py` with in-memory DB fixture.
+- Implement integration tests for `SettlementService` and unit tests for `Validators`.
+- Add test script to development workflow.
 ## Excluded
-- Changing existing API error handling logic beyond replacing `console.error` with `notifyError`.
+- Full UI testing.
+- End-to-end testing of `pywebview` bridge.
 ---
 # Business Value
-- Improved user feedback for success/failure states.
-- Standardized error handling across the application.
+- Regression prevention.
+- Validates complex financial/settlement calculations.
+- Documentation via executable code.
+- CI/CD readiness.
 ---
 # Related Features
-- Sales Management, Offload Management, Agent/Dealer Management.
+- Settlement calculations, Data persistence, Request validation.
 ---
 # Dependencies
-- `lucide-react` (installed via project dependencies)
----
-# Relevant Knowledge
-- Task-2.4.md
-- UI Component Governance Rules
-- API Policy in SSOT.md
+- `pytest`, `pytest-cov`.
 ---
 # Architectural Constraints
-- Follow standard context provider pattern.
-- Animations must fit the modern-futuristic design system.
-- Notification component must be correctly z-indexed and viewport-pinned.
+- Tests must be isolated (clean DB state per test).
+- Use in-memory SQLite (`:memory:`) to keep tests fast.
+- Must not impact production/development `vanguard.db`.
 ---
 # Assumptions
-- Application is wrapped at the top level in `main.jsx`.
-- Standardized `notifyError` and `notifySuccess` API.
+- In-memory database provides sufficient fidelity for functional/integration testing.
 ---
 # Risks
-- Potential for z-index conflicts.
-- Notification state management overhead in complex async flows.
+- In-memory DB might miss subtle file-system locking bugs (though these are mitigated by `ConnectionPool`).
+- High maintenance overhead for tests if not kept lightweight.
 ---
 # Edge Cases
-- Overlapping notifications.
-- Long error messages.
-- Browser notification permissions (not applicable to in-app toasts).
+- Settlement with blacklisted tickets.
+- Settlement for draws with zero sales.
+- Validation for edge-case Pydantic schemas.
 ---
 # Implementation Plan
 ## Step 1
 Description:
-Create `NotificationContext.jsx` and add animation styles to `index.css`.
-Expected Output:
-New context file and CSS rule.
+Install dependencies and initialize configuration.
 Validation:
-- [x] Context provider and hook exported.
-- [x] CSS animation rule present.
+- [ ] `pytest` and `pytest-cov` installed.
+- [ ] `pytest.ini` created.
 ---
 ## Step 2
 Description:
-Wrap `main.jsx` with `NotificationProvider`.
-Expected Output:
-App correctly wrapped.
+Setup test infrastructure (conftest.py and directory).
 Validation:
-- [x] Application starts without errors.
+- [ ] In-memory DB fixture functional.
 ---
 ## Step 3
 Description:
-Integrate `useNotification` in critical pages (`DrawsPage`, `AgentsPage`, `MasterDealersPage`, `SalesPage`, `OffloadPage`).
-Expected Output:
-Async handlers use `notifySuccess` and `notifyError`.
+Implement integration tests for Settlement logic and unit tests for Validators.
 Validation:
-- [x] `DrawsPage` updated.
-- [x] `AgentsPage` updated.
-- [x] `MasterDealersPage` updated.
-- [x] `SalesPage` updated.
-- [x] `OffloadPage` updated.
+- [ ] Tests covering basic settlement math.
+- [ ] Tests covering blacklist deductions.
+- [ ] Tests covering Pydantic validation rules.
+---
+## Step 4
+Description:
+Run test suite and generate coverage reports.
+Validation:
+- [ ] All tests pass.
+- [ ] Coverage > 80%.
 ---
 # Files Expected To Change
-- frontend/src/context/NotificationContext.jsx (New)
-- frontend/src/index.css
-- frontend/src/main.jsx
-- frontend/src/pages/DrawsPage.jsx
-- frontend/src/pages/AgentsPage.jsx
-- frontend/src/pages/MasterDealersPage.jsx
-- frontend/src/pages/SalesPage.jsx
-- frontend/src/pages/OffloadPage.jsx
+- backend/requirements.txt (Updated)
+- backend/pytest.ini (New)
+- backend/tests/* (New)
 ---
 # Testing Strategy
-## Manual Testing
-- Trigger success/failure scenarios in each refactored page.
+- Use isolated in-memory SQLite databases for each test function via `temp_db` fixture.
 ---
 # Acceptance Criteria
-- Global notification system active.
-- Toasts appear and disappear within expected timeframe.
-- Actions provide immediate user feedback.
+- `pytest` executes successfully.
+- Integration tests confirm business logic correctness.
+- Coverage reports indicate > 80% coverage for domain services.
 ---
 # Anti-Patterns
-- Silent error handling.
-- Duplicating notification logic in every page.
+- Tests depending on real `vanguard.db`.
+- Tests sharing global state.
 ---
 # Rollback Plan
-- Revert changes to `main.jsx`, remove context provider and related files.
+- Revert testing dependencies and remove `tests/` directory.
 ---
 # Completion Notes
-- Implemented `NotificationContext` with `notifySuccess`, `notifyError`, and `notifyWarning` methods.
-- Integrated the notification system into the global app state via `NotificationProvider`.
-- Refactored core pages (`DrawsPage`, `AgentsPage`, `MasterDealersPage`, `SalesPage`, `OffloadPage`) to use `useNotification` for standardized user feedback, successfully replacing silent `console.error` logs.
+- Pending.

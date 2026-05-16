@@ -1,17 +1,24 @@
 import sqlite3
 import os
+from .pool import ConnectionPool
 
 class DatabaseManager:
-    def __init__(self, db_path='backend/database/vanguard.db'):
+    def __init__(self, db_path='backend/database/vanguard.db', max_connections=10):
         self.db_path = db_path
-        # Ensure directory exists
-        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+        # Ensure directory exists (only for actual file paths)
+        if self.db_path != ':memory:':
+            os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
+        # Initialize the singleton pool
+        self.pool = ConnectionPool(self.db_path, max_connections)
         self.init_db()
 
     def get_connection(self):
-        conn = sqlite3.connect(self.db_path)
-        conn.execute('PRAGMA foreign_keys = ON')
-        return conn
+        """
+        Returns a context manager that yields a pooled connection.
+        Usage: with db.get_connection() as conn: ...
+        """
+        from .pool import PooledConnection
+        return PooledConnection(self.pool)
 
     def init_db(self):
         with self.get_connection() as conn:

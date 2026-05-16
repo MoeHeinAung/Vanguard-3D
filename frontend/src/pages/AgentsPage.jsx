@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import EntityForm from '@/components/features/EntityForm'
 import { callPython } from '../utils/bridge'
@@ -83,6 +83,9 @@ function AgentsPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{isEdit ? 'Edit Agent' : 'New Agent'}</DialogTitle>
+              <DialogDescription>
+                {isEdit ? 'Update the details for this agent.' : 'Enter the details for a new agent.'}
+              </DialogDescription>
             </DialogHeader>
             <EntityForm
               entityType="Agent"

@@ -1,7 +1,11 @@
 import webview
 import os
 import sys
+from pydantic import ValidationError
 from backend.database.manager import DatabaseManager
+from backend.repositories.draw_repository import DrawRepository
+from backend.repositories.agent_repository import AgentRepository
+from backend.repositories.master_dealer_repository import MasterDealerRepository
 from backend.services.draw_service import DrawService
 from backend.services.agent_service import AgentService
 from backend.services.master_dealer_service import MasterDealerService
@@ -9,13 +13,18 @@ from backend.services.sale_service import SaleService
 from backend.services.offload_service import OffloadService
 from backend.services.settings_service import SettingsService
 from backend.services.settlement_service import SettlementService
+from backend.validators.draw_validator import CreateDrawRequest
+from backend.validators.agent_validator import CreateAgentRequest
 
 class API:
     def __init__(self):
         self.db = DatabaseManager()
-        self.draw_service = DrawService(self.db)
-        self.agent_service = AgentService(self.db)
-        self.md_service = MasterDealerService(self.db)
+        self.draw_repo = DrawRepository(self.db)
+        self.agent_repo = AgentRepository(self.db)
+        self.md_repo = MasterDealerRepository(self.db)
+        self.draw_service = DrawService(self.draw_repo)
+        self.agent_service = AgentService(self.agent_repo)
+        self.md_service = MasterDealerService(self.md_repo)
         self.sale_service = SaleService(self.db)
         self.offload_service = OffloadService(self.db)
         self.settings_service = SettingsService(self.db)
@@ -50,11 +59,11 @@ class API:
 
     def create_draw(self, data):
         try:
-            return self.draw_service.create_draw(
-                data['draw_date'], 
-                data['cutoff_time'], 
-                data.get('notes')
-            )
+            validated_data = CreateDrawRequest(**data)
+            return self.draw_service.create_draw(**validated_data.model_dump())
+        except ValidationError as e:
+            error_msg = "; ".join([f"{err['loc'][0]}: {err['msg']}" for err in e.errors()])
+            raise ValueError(f"Validation Failed: {error_msg}")
         except Exception as e:
             print(f"Error in create_draw: {e}", file=sys.stderr)
             raise e
@@ -76,10 +85,11 @@ class API:
 
     def create_agent(self, data):
         try:
-            return self.agent_service.create_agent(
-                data['id'], data['name'], data['commission'], 
-                data['jp_factor'], data['sp_factor'], data.get('notes')
-            )
+            validated_data = CreateAgentRequest(**data)
+            return self.agent_service.create_agent(**validated_data.model_dump())
+        except ValidationError as e:
+            error_msg = "; ".join([f"{err['loc'][0]}: {err['msg']}" for err in e.errors()])
+            raise ValueError(f"Validation Failed: {error_msg}")
         except Exception as e:
             print(f"Error in create_agent: {e}", file=sys.stderr)
             raise e

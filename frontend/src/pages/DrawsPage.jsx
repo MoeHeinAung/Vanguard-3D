@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -121,6 +121,9 @@ function DrawsPage({ onOpenReport }) {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>New Lottery Draw</DialogTitle>
+              <DialogDescription>
+                Define the draw date and cutoff time to initialize a new lottery session.
+              </DialogDescription>
             </DialogHeader>
             <DrawForm onSubmit={handleCreateDraw} onCancel={() => setIsDialogOpen(false)} />
           </DialogContent>
