@@ -73,6 +73,26 @@ class DatabaseManager:
                 )
             ''')
             cursor.execute('''
+                CREATE TABLE IF NOT EXISTS blacklist_tickets (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    draw_id INTEGER NOT NULL,
+                    ticket TEXT NOT NULL,
+                    type TEXT NOT NULL, -- 'HALF' or 'BLOCK'
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (draw_id) REFERENCES draws (id)
+                )
+            ''')
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS winning_tickets (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    draw_id INTEGER NOT NULL,
+                    ticket TEXT NOT NULL,
+                    type TEXT NOT NULL, -- 'Jackpot' or 'Minor'
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (draw_id) REFERENCES draws (id)
+                )
+            ''')
+            cursor.execute('''
                 CREATE TABLE IF NOT EXISTS settings (
                     key TEXT PRIMARY KEY,
                     value TEXT NOT NULL
