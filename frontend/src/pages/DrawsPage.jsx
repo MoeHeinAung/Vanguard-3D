@@ -12,12 +12,19 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { callPython } from '../utils/bridge'
-import { Plus, Calendar, Clock, Flag } from 'lucide-react'
+import { Plus, Calendar, Clock, Flag, AlertCircle } from 'lucide-react'
 
 function DrawsPage() {
   const [draws, setDraws] = useState([])
   const [selectedDraw, setSelectedDraw] = useState(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  
+  // Settlement Modals
+  const [isBlacklistModalOpen, setIsBlacklistModalOpen] = useState(false)
+  const [isWinnersModalOpen, setIsWinnersModalOpen] = useState(false)
+  
+  const [blacklistForm, setBlacklistModalData] = useState({ ticket: '', type: 'HALF' })
+  const [winnersForm, setWinnersModalData] = useState({ ticket: '', type: 'Jackpot' })
 
   useEffect(() => {
     const loadDraws = async () => {
@@ -44,6 +51,36 @@ function DrawsPage() {
       console.error('Failed to create draw:', error)
     }
   }
+
+  const handleAddBlacklist = async () => {
+    if (!selectedDraw) return;
+    try {
+      await callPython('add_blacklist_ticket', {
+        draw_id: selectedDraw.id,
+        ticket: blacklistForm.ticket,
+        type: blacklistForm.type
+      });
+      setIsBlacklistModalOpen(false);
+      setBlacklistModalData({ ticket: '', type: 'HALF' });
+    } catch (error) {
+      console.error('Failed to add blacklist ticket:', error);
+    }
+  };
+
+  const handleAddWinner = async () => {
+    if (!selectedDraw) return;
+    try {
+      await callPython('add_winning_ticket', {
+        draw_id: selectedDraw.id,
+        ticket: winnersForm.ticket,
+        type: winnersForm.type
+      });
+      setIsWinnersModalOpen(false);
+      setWinnersModalData({ ticket: '', type: 'Jackpot' });
+    } catch (error) {
+      console.error('Failed to add winning ticket:', error);
+    }
+  };
 
   const getStatusVariant = (status) => {
     switch (status) {
@@ -162,9 +199,79 @@ function DrawsPage() {
                   </p>
                 </div>
 
+                <div className="flex gap-4">
+                  <Dialog open={isBlacklistModalOpen} onOpenChange={setIsBlacklistModalOpen}>
+                    <Button variant="outline" className="flex-1 gap-2" onClick={() => setIsBlacklistModalOpen(true)}>
+                      <AlertCircle className="h-4 w-4" />
+                      Manage Blacklist
+                    </Button>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Add to Blacklist</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 pt-4">
+                        <div className="space-y-2">
+                          <Label>Ticket Number</Label>
+                          <Input 
+                            placeholder="e.g. 123" 
+                            value={blacklistForm.ticket}
+                            onChange={(e) => setBlacklistModalData({ ...blacklistForm, ticket: e.target.value })}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Reduction Type</Label>
+                          <select 
+                            className="w-full bg-background border border-border p-2 rounded-none text-sm"
+                            value={blacklistForm.type}
+                            onChange={(e) => setBlacklistModalData({ ...blacklistForm, type: e.target.value })}
+                          >
+                            <option value="HALF">HALF (50% Payout)</option>
+                            <option value="BLOCK">BLOCK (Pending Offload)</option>
+                          </select>
+                        </div>
+                        <Button className="w-full" onClick={handleAddBlacklist}>Add Blacklist Entry</Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+
+                  <Dialog open={isWinnersModalOpen} onOpenChange={setIsWinnersModalOpen}>
+                    <Button variant="outline" className="flex-1 gap-2" onClick={() => setIsWinnersModalOpen(true)}>
+                      <Plus className="h-4 w-4" />
+                      Declare Winners
+                    </Button>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Declare Winning Ticket</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 pt-4">
+                        <div className="space-y-2">
+                          <Label>Ticket Number</Label>
+                          <Input 
+                            placeholder="e.g. 123" 
+                            value={winnersForm.ticket}
+                            onChange={(e) => setWinnersModalData({ ...winnersForm, ticket: e.target.value })}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Prize Type</Label>
+                          <select 
+                            className="w-full bg-background border border-border p-2 rounded-none text-sm"
+                            value={winnersForm.type}
+                            onChange={(e) => setWinnersModalData({ ...winnersForm, type: e.target.value })}
+                          >
+                            <option value="Jackpot">Jackpot</option>
+                            <option value="Minor">Minor</option>
+                          </select>
+                        </div>
+                        <Button className="w-full" onClick={handleAddWinner}>Record Winner</Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
                 {selectedDraw.status === 'Closed' && (
                   <Button className="btn-primary-gradient w-full" size="lg">
-                    Settle Draw &amp; Enter Winning Numbers
+                    Settle Draw &amp; Calculate Payouts
                   </Button>
                 )}
               </CardContent>
