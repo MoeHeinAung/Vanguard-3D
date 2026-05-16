@@ -120,6 +120,18 @@ const SalesPage = () => {
     { id: 'Ticket', label: 'Ticket' }
   ];
 
+  const overallSummary = useMemo(() => {
+    const total = sales.reduce((sum, s) => sum + s.amount, 0);
+    const uniqueTickets = new Set(sales.map(s => s.ticket)).size;
+    const commission = sales.reduce((sum, s) => {
+      const agent = agents.find(a => a.id === s.agent_id);
+      return sum + (s.amount * (agent?.commission || 0) / 100);
+    }, 0);
+    return { total, uniqueTickets, commission };
+  }, [sales, agents]);
+
+  const summaryData = agentFilter ? agentSummary : overallSummary;
+
   return (
     <div className="h-full w-full flex flex-col bg-background text-foreground overflow-hidden">
       {/* Top Bar: Page Context */}
@@ -134,9 +146,33 @@ const SalesPage = () => {
 
         <div className="flex items-center gap-2 text-muted-foreground text-xs font-bold uppercase tracking-tighter">
           <User size={16} className="text-primary" />
-          <span>Agent Operations</span>
+          <span>{agentFilter ? `Agent: ${agentFilter.name}` : 'All Agents Operations'}</span>
         </div>
       </header>
+
+      {/* Fixed Summary Cards */}
+      <div className="flex-none p-4 pb-2">
+        <Card className="glass-card border-primary/20 bg-primary/5">
+          <CardContent className="p-4 grid grid-cols-3 gap-6">
+            <div className="space-y-1">
+              <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
+                {agentFilter ? 'Total Sales' : 'Global Sales'}
+              </Label>
+              <div className="text-2xl font-mono font-bold text-primary">${summaryData.total.toLocaleString()}</div>
+            </div>
+            <div className="space-y-1 border-x border-border/30 px-6">
+              <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
+                {agentFilter ? `Commission (${agentFilter.commission}%)` : 'Total Commission Payable'}
+              </Label>
+              <div className="text-2xl font-mono font-bold text-amber-400">${summaryData.commission.toLocaleString()}</div>
+            </div>
+            <div className="space-y-1 text-right">
+              <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Unique Tickets</Label>
+              <div className="text-2xl font-mono font-bold text-cyan-400">{summaryData.uniqueTickets}</div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <main className="flex-1 flex min-h-0 overflow-hidden">
         {/* Left Sidebar: Agents */}
@@ -192,28 +228,6 @@ const SalesPage = () => {
 
         {/* Right Content: Data Table */}
         <section className="flex-1 flex flex-col bg-background/50 overflow-hidden">
-          {/* Agent Summary Card */}
-          {agentFilter && (
-            <div className="flex-none p-4 pb-0">
-              <Card className="glass-card border-primary/20 bg-primary/5">
-                <CardContent className="p-4 grid grid-cols-3 gap-6">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Total Sales</Label>
-                    <div className="text-2xl font-mono font-bold text-primary">${agentSummary.total.toLocaleString()}</div>
-                  </div>
-                  <div className="space-y-1 border-x border-border/30 px-6">
-                    <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Commission ({agentFilter.commission}%)</Label>
-                    <div className="text-2xl font-mono font-bold text-amber-400">${agentSummary.commission.toLocaleString()}</div>
-                  </div>
-                  <div className="space-y-1 text-right">
-                    <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Unique Tickets</Label>
-                    <div className="text-2xl font-mono font-bold text-cyan-400">{agentSummary.uniqueTickets}</div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
           <div className="flex-none p-4 pb-0 flex items-center justify-between bg-card/5 border-b border-border/30 mt-2">
             <div className="flex gap-1">
               {tabs.map(tab => (
