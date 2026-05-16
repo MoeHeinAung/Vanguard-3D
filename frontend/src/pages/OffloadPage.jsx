@@ -36,6 +36,15 @@ const OffloadPage = () => {
   const [selectedHistoryId, setSelectedHistoryId] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   
+  const historyData = useMemo(() => {
+    const groups = {};
+    offloads.forEach(o => {
+      if (!groups[o.created_at]) groups[o.created_at] = { created_at: o.created_at, tickets: [] };
+      groups[o.created_at].tickets.push({ ticket: o.ticket, amount: o.amount });
+    });
+    return Object.values(groups).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  }, [offloads]);
+  
   const downloadTemplateAsImage = async () => {
     if (!templateRef.current) return;
     
