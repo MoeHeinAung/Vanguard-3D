@@ -42,7 +42,11 @@ const OffloadPage = () => {
       if (!groups[o.created_at]) groups[o.created_at] = { created_at: o.created_at, tickets: [] };
       groups[o.created_at].tickets.push({ ticket: o.ticket, amount: o.amount });
     });
-    return Object.values(groups).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    // Sort ascending by time to assign page numbers (earliest = 1)
+    return Object.values(groups)
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+      .map((g, i) => ({ ...g, pageNumber: i + 1 }))
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Display newest first
   }, [offloads]);
   
   const downloadTemplateAsImage = async () => {
@@ -59,8 +63,9 @@ const OffloadPage = () => {
       const link = document.createElement('a');
       const dateStr = selectedDraw?.draw_date || new Date().toISOString().split('T')[0];
       link.href = image;
-      link.download = `KALAW_OFFLOAD_${dateStr}_PAGE_${pageNumber}.png`;
+      link.download = `KALAW_OFFLOAD_${dateStr}_PAGE_${displayPageNumber}.png`;
       link.click();
+
     } catch (error) {
       console.error("Image export failed:", error);
     }
@@ -144,14 +149,18 @@ const OffloadPage = () => {
 
   const pendingTickets = useMemo(() => riskAggregates.filter(i => i.pending > 0), [riskAggregates]);
 
-  // Template Data: Always preview the next batch of pending tickets
+  // Template Data
   const templateBatch = useMemo(() => {
+    if (leftTab === 'History' && selectedHistoryId) {
+      const historyItem = historyData.find(h => h.created_at === selectedHistoryId);
+      return historyItem ? historyItem.tickets : [];
+    }
     return pendingTickets.slice(0, maxOffloadTicket).map(t => ({
       ticket: t.ticket,
       amount: t.pending > maxOffloadAmount ? maxOffloadAmount : t.pending,
       originalPending: t.pending
     }));
-  }, [pendingTickets, maxOffloadTicket, maxOffloadAmount]);
+  }, [pendingTickets, maxOffloadTicket, maxOffloadAmount, leftTab, selectedHistoryId, historyData]);
 
   const handlePerformOffload = async () => {
     if (templateBatch.length === 0 || !selectedDealerId || !selectedDraw) return;
@@ -292,7 +301,8 @@ const OffloadPage = () => {
               <table className="w-full text-left border-collapse">
                 <thead className="sticky top-0 z-10 bg-slate-900/95 backdrop-blur-sm border-b border-white/5">
                   <tr>
-                    <th className="p-2 text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider pl-4">Time</th>
+                    <th className="p-2 text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider pl-4">Pg</th>
+                    <th className="p-2 text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider">Time</th>
                     <th className="p-2 text-[9px] uppercase font-bold text-muted-foreground/60 tracking-wider text-right pr-4">Total</th>
                   </tr>
                 </thead>
@@ -303,7 +313,10 @@ const OffloadPage = () => {
                       onClick={() => setSelectedHistoryId(h.created_at)}
                       className={`cursor-pointer hover:bg-white/[0.05] transition-colors ${selectedHistoryId === h.created_at ? 'bg-primary/10' : ''}`}
                     >
-                      <td className="p-2 py-2.5 font-mono text-[10px] font-bold pl-4">
+                      <td className="p-2 py-2.5 font-mono text-[10px] font-bold pl-4 text-muted-foreground">
+                        #{h.pageNumber}
+                      </td>
+                      <td className="p-2 py-2.5 font-mono text-[10px] font-bold">
                         {new Date(h.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </td>
                       <td className="p-2 py-2.5 text-right font-mono text-[10px] font-bold pr-4">
