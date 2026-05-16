@@ -55,7 +55,7 @@ function Navbar({ onNavigate, activePage }) {
               className={cn(
                 "p-2 rounded-none border transition-all",
                 activePage === 'home'
-                  ? "bg-slate-100 text-obsidian-900 border-white"
+                  ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/50"
                   : "bg-transparent text-slate-400 border-border/40 hover:text-white hover:border-slate-500"
               )}
             >
