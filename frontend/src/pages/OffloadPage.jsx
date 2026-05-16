@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import html2canvas from 'html2canvas';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -22,6 +23,8 @@ const OffloadPage = () => {
   const [selectedDraw, setSelectedDraw] = useState(null);
   const [selectedDealerId, setSelectedDealerId] = useState('');
   
+  const templateRef = useRef(null);
+
   // Persistent Settings
   const [adminHold, setAdminHold] = useState(5000);
   const [maxOffloadAmount, setMaxOffloadAmount] = useState(10000);
@@ -31,6 +34,27 @@ const OffloadPage = () => {
   // UI State
   const [leftTab, setLeftTab] = useState('Pending'); // Holding, Offloaded, Pending
   const [isLoading, setIsLoading] = useState(false);
+  
+  const downloadTemplateAsImage = async () => {
+    if (!templateRef.current) return;
+    
+    try {
+      const canvas = await html2canvas(templateRef.current, {
+        scale: 2, // High resolution
+        useCORS: true,
+        backgroundColor: '#ffffff'
+      });
+      
+      const image = canvas.toDataURL("image/png");
+      const link = document.createElement('a');
+      const dateStr = selectedDraw?.draw_date || new Date().toISOString().split('T')[0];
+      link.href = image;
+      link.download = `KALAW_OFFLOAD_${dateStr}_PAGE_${pageNumber}.png`;
+      link.click();
+    } catch (error) {
+      console.error("Image export failed:", error);
+    }
+  };
   
   const fetchData = async () => {
     try {
@@ -133,6 +157,9 @@ const OffloadPage = () => {
         input_text: inputText,
         notes: `Offload Page ${pageNumber}`
       });
+      
+      // Trigger image export BEFORE updating state/refreshing
+      await downloadTemplateAsImage();
       
       // Increment page number
       const nextPg = pageNumber + 1;
@@ -289,7 +316,7 @@ const OffloadPage = () => {
         {/* MAIN CONTENT: Template Preview (Wide) */}
         <main className="flex-1 bg-black/40 p-6 overflow-hidden flex flex-col items-center justify-center">
           {templateBatch.length > 0 ? (
-            <div className="w-full h-full bg-white text-black p-10 shadow-2xl relative overflow-hidden flex flex-col">
+            <div ref={templateRef} className="w-full h-full bg-white text-black p-10 shadow-2xl relative overflow-hidden flex flex-col">
               {/* Paper Texture Overlay */}
               <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/pinstriped-suit.png')]" />
               
