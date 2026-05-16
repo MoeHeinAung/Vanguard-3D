@@ -365,7 +365,7 @@ const OffloadPage = () => {
                 <div className="flex items-baseline gap-6 text-right">
                   <p className="text-[10px] font-bold font-mono text-gray-400 uppercase tracking-widest">{selectedDraw?.draw_date}</p>
                   <p className="text-lg font-bold uppercase tracking-widest leading-none">
-                    <span className="text-[10px] mr-2 opacity-30">PAGE</span> {pageNumber}
+                    <span className="text-[10px] mr-2 opacity-30">PAGE</span> {displayPageNumber}
                   </p>
                 </div>
               </div>
