@@ -197,6 +197,14 @@ const OffloadPage = () => {
 
   const batchTotal = useMemo(() => templateBatch.reduce((sum, item) => sum + item.amount, 0), [templateBatch]);
 
+  const displayPageNumber = useMemo(() => {
+    if (leftTab === 'History' && selectedHistoryId) {
+      const historyItem = historyData.find(h => h.created_at === selectedHistoryId);
+      return historyItem ? historyItem.pageNumber : 1;
+    }
+    return pageNumber;
+  }, [leftTab, selectedHistoryId, historyData, pageNumber]);
+
   return (
     <div className="h-full w-full flex flex-col bg-background text-foreground overflow-hidden">
       {/* Top Header - Settings & Master Dealer Selection */}
