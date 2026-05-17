@@ -1,0 +1,19 @@
+{
+    "runtime": {
+        "os": "win32",
+        "python_version": "3.12",
+        "node_version": ">=18.0.0"
+    },
+    "technologies": {
+        "backend_engine": "Python",
+        "frontend_engine": "React",
+        "bridge": "pywebview",
+        "database": "SQLite3",
+        "bundler": "Vite",
+        "styles": "TailwindCSS"
+    },
+    "operational_modes": {
+        "development": "Vite Dev Server (HMR) + Python pywebview window",
+        "production": "Compiled Frontend Assets + Python Executable"
+    }
+}

@@ -1,0 +1,17 @@
+{
+  "services": [
+    { "name": "AgentService", "path": "backend/services/agent_service.py", "description": "Handles agent management and hierarchy" },
+    { "name": "DrawService", "path": "backend/services/draw_service.py", "description": "Core draw business logic and lifecycle" },
+    { "name": "MasterDealerService", "path": "backend/services/master_dealer_service.py", "description": "Manages master dealer relations" },
+    { "name": "OffloadService", "path": "backend/services/offload_service.py", "description": "Aggregates offload data" },
+    { "name": "SaleService", "path": "backend/services/sale_service.py", "description": "Ticket sales logic" },
+    { "name": "SettingsService", "path": "backend/services/settings_service.py", "description": "System configuration" },
+    { "name": "SettlementService", "path": "backend/services/settlement_service.py", "description": "Payouts and revenue calculations" }
+  ],
+  "repositories": [
+    { "name": "AgentRepository", "path": "backend/repositories/agent_repository.py" },
+    { "name": "DrawRepository", "path": "backend/repositories/draw_repository.py" },
+    { "name": "MasterDealerRepository", "path": "backend/repositories/master_dealer_repository.py" },
+    { "name": "SaleRepository", "path": "backend/repositories/sale_repository.py" }
+  ]
+}

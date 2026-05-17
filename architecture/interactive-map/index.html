@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vanguard-3D | Architectural Intelligence Map</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+    <div id="app-container">
+        <header>
+            <div class="logo-container">
+                <span class="logo-v">V</span>
+                <h1>VANGUARD-3D <span class="subtitle">System Architecture Map</span></h1>
+            </div>
+            <div class="controls">
+                <button id="reset-btn">Reset View</button>
+                <div class="search-container">
+                    <input type="text" id="node-search" placeholder="Search components...">
+                </div>
+            </div>
+        </header>
+        
+        <main>
+            <div id="network-container"></div>
+            <div id="info-panel" class="hidden">
+                <div class="panel-header">
+                    <h2 id="component-name">Component Details</h2>
+                    <button id="close-panel">&times;</button>
+                </div>
+                <div class="panel-content">
+                    <div class="meta-item">
+                        <label>Layer:</label>
+                        <span id="component-layer">-</span>
+                    </div>
+                    <div class="meta-item">
+                        <label>Path:</label>
+                        <code id="component-path">-</code>
+                    </div>
+                    <div class="description-box">
+                        <p id="component-description">Select a node to view its architectural purpose and relationships.</p>
+                    </div>
+                    <div class="relations-box">
+                        <h3>Dependencies</h3>
+                        <ul id="component-dependencies"></ul>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="legend">
+                <span class="legend-item"><span class="dot frontend"></span> Frontend</span>
+                <span class="legend-item"><span class="dot bridge"></span> Bridge</span>
+                <span class="legend-item"><span class="dot service"></span> Service</span>
+                <span class="legend-item"><span class="dot repository"></span> Repository</span>
+                <span class="legend-item"><span class="dot database"></span> Database</span>
+                <span class="legend-item"><span class="dot infra"></span> Infrastructure</span>
+            </div>
+            <div class="status">System Status: <span class="online">ONLINE</span></div>
+        </footer>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

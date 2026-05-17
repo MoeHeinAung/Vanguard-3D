@@ -1,0 +1,32 @@
+{
+    "tables": [
+        {
+            "name": "draws",
+            "columns": ["id", "draw_date", "cutoff_time", "status", "notes", "created_at"],
+            "description": "Lifecycle records for lottery draws."
+        },
+        {
+            "name": "agents",
+            "columns": ["id", "name", "commission", "jp_factor", "sp_factor", "notes", "created_at"],
+            "description": "Sales agent definitions and parameters."
+        },
+        {
+            "name": "sales",
+            "columns": ["id", "draw_id", "agent_id", "ticket", "amount", "notes", "created_at"],
+            "fks": ["draw_id -> draws.id", "agent_id -> agents.id"],
+            "description": "Individual ticket sales transactions."
+        },
+        {
+            "name": "offloaded_tickets",
+            "columns": ["id", "draw_id", "master_dealer_id", "ticket", "amount", "notes", "created_at"],
+            "fks": ["draw_id -> draws.id", "master_dealer_id -> master_dealers.id"],
+            "description": "Liabilities offloaded to external dealers."
+        },
+        {
+            "name": "winning_tickets",
+            "columns": ["id", "draw_id", "ticket", "type", "created_at"],
+            "fks": ["draw_id -> draws.id"],
+            "description": "Historical winning numbers and prize types."
+        }
+    ]
+}

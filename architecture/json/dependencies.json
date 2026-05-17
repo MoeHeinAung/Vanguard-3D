@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "backend": [ "sqlite3", "pydantic", "pywebview" ],
+    "frontend": [ "react", "vite", "tailwind" ],
+    "bridge": [ "json", "pywebview.api" ]
+  }
+}

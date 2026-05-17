@@ -1,0 +1,50 @@
+{
+    "nodes": [
+        { "id": "ui_dashboard", "label": "Dashboard", "group": "frontend", "path": "frontend/src/App.jsx", "description": "Main entry hub for the user interface." },
+        { "id": "ui_draws", "label": "Draws Page", "group": "frontend", "path": "frontend/src/pages/DrawsPage.jsx", "description": "Interface for managing lottery draw lifecycles." },
+        { "id": "ui_sales", "label": "Sales Page", "group": "frontend", "path": "frontend/src/pages/SalesPage.jsx", "description": "Interface for ticket entry and real-time validation." },
+        { "id": "ui_offload", "label": "Offload Page", "group": "frontend", "path": "frontend/src/pages/OffloadPage.jsx", "description": "Interface for managing liability offloading to master dealers." },
+        { "id": "ui_report", "label": "Report Page", "group": "frontend", "path": "frontend/src/pages/ReportPage.jsx", "description": "Financial and operational reporting view." },
+        
+        { "id": "bridge_api", "label": "API Bridge", "group": "bridge", "path": "main.py", "description": "The pywebview JS-to-Python bridge. Orchestrates all backend calls." },
+        
+        { "id": "svc_draw", "label": "Draw Service", "group": "service", "path": "backend/services/draw_service.py", "description": "Business logic for draw timing, status updates, and settlement triggers." },
+        { "id": "svc_agent", "label": "Agent Service", "group": "service", "path": "backend/services/agent_service.py", "description": "Manages agent hierarchies and commission logic." },
+        { "id": "svc_sale", "label": "Sale Service", "group": "service", "path": "backend/services/sale_service.py", "description": "Logic for parsing and persisting ticket sales." },
+        { "id": "svc_settlement", "label": "Settlement Service", "group": "service", "path": "backend/services/settlement_service.py", "description": "Core engine for payout calculations and revenue aggregation." },
+        
+        { "id": "repo_draw", "label": "Draw Repository", "group": "repository", "path": "backend/repositories/draw_repository.py", "description": "SQL-based data access for draw records." },
+        { "id": "repo_agent", "label": "Agent Repository", "group": "repository", "path": "backend/repositories/agent_repository.py", "description": "SQL-based data access for agent records." },
+        
+        { "id": "db_vanguard", "label": "Vanguard DB", "group": "database", "path": "backend/database/vanguard.db", "description": "SQLite database storage (WAL mode)." },
+        { "id": "db_pool", "label": "Connection Pool", "group": "infra", "path": "backend/database/pool.py", "description": "Thread-safe connection manager for pywebview multi-threading." },
+        
+        { "id": "util_parser", "label": "Ticket Parser", "group": "infra", "path": "backend/utils/ticket_parser.py", "description": "Domain utility for parsing complex ticket input strings." }
+    ],
+    "edges": [
+        { "from": "ui_dashboard", "to": "ui_draws", "label": "Navigate" },
+        { "from": "ui_dashboard", "to": "ui_sales", "label": "Navigate" },
+        { "from": "ui_dashboard", "to": "ui_offload", "label": "Navigate" },
+        
+        { "from": "ui_draws", "to": "bridge_api", "label": "Bridge Call" },
+        { "from": "ui_sales", "to": "bridge_api", "label": "Bridge Call" },
+        { "from": "ui_offload", "to": "bridge_api", "label": "Bridge Call" },
+        
+        { "from": "bridge_api", "to": "svc_draw", "label": "Invoke" },
+        { "from": "bridge_api", "to": "svc_agent", "label": "Invoke" },
+        { "from": "bridge_api", "to": "svc_sale", "label": "Invoke" },
+        { "from": "bridge_api", "to": "svc_settlement", "label": "Invoke" },
+        
+        { "from": "svc_draw", "to": "repo_draw", "label": "Data Access" },
+        { "from": "svc_agent", "to": "repo_agent", "label": "Data Access" },
+        { "from": "svc_sale", "to": "db_pool", "label": "Query" },
+        { "from": "svc_settlement", "to": "db_pool", "label": "Calculate" },
+        
+        { "from": "repo_draw", "to": "db_pool", "label": "Pooled Connection" },
+        { "from": "repo_agent", "to": "db_pool", "label": "Pooled Connection" },
+        
+        { "from": "db_pool", "to": "db_vanguard", "label": "SQLite I/O" },
+        
+        { "from": "svc_sale", "to": "util_parser", "label": "Parse Input" }
+    ]
+}

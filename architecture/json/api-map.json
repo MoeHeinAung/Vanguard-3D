@@ -1,0 +1,7 @@
+{
+  "api": [
+    { "name": "get_draws", "source": "backend/api/draws", "target": "DrawService" },
+    { "name": "process_sale", "source": "backend/api/sales", "target": "SaleService" },
+    { "name": "get_settlement", "source": "backend/api/settlement", "target": "SettlementService" }
+  ]
+}
