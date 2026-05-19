@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <!-- Primary: electric amber-orange -->
+    <linearGradient id="js-primary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#f59e0b" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#d97706" stop-opacity="1"/>
+    </linearGradient>
+    <!-- Secondary: warm red -->
+    <linearGradient id="js-secondary" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%"   stop-color="#fbbf24" stop-opacity="0.90"/>
+      <stop offset="100%" stop-color="#ef4444" stop-opacity="0.65"/>
+    </linearGradient>
+    <!-- Sweep glow -->
+    <linearGradient id="js-sweep" x1="100%" y1="0%" x2="0%" y2="0%">
+      <stop offset="0%"   stop-color="#f59e0b" stop-opacity="0.70"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Speed arc -->
+    <linearGradient id="js-arc" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#fbbf24" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#ef4444" stop-opacity="0.90"/>
+    </linearGradient>
+    <filter id="js-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- BACKGROUND: warm off-black -->
+  <rect width="400" height="400" rx="56" fill="#1c1204"/>
+
+  <!-- TERMINAL HORIZON LINE -->
+  <line x1="40" y1="252" x2="360" y2="252"
+        stroke="#f59e0b" stroke-width="0.7" opacity="0.22"/>
+  <line x1="40" y1="256" x2="360" y2="256"
+        stroke="#f59e0b" stroke-width="0.5" opacity="0.14"/>
+
+  <!-- SPEED SWEEP GLOW (behind mark) -->
+  <path d="M 312 88 C 312 88 274 244 250 256 C 226 268 80 256 56 224"
+        stroke="url(#js-sweep)" stroke-width="16" fill="none"
+        stroke-linecap="round" opacity="0.35" filter="url(#js-glow)"/>
+
+  <!-- ── MARK: FLAG + HORIZONTAL SPEED LINES ── -->
+  <g transform="translate(46,72)" filter="url(#js-glow)">
+    <!-- SPEED SWEEP (primary checkered sweep) -->
+    <path d="M 256 76 C 256 76 240 208 220 218 C 200 228 64 214 52 184"
+          stroke="url(#js-arc)" stroke-width="12" fill="none"
+          stroke-linecap="round"/>
+
+    <!-- INTERNAL CHECKERS (left half of flag — dark squares) -->
+    <rect x="212" y="48" width="22" height="22"
+          fill="#1c1204" opacity="0.75" rx="1"/>
+    <rect x="212" y="70" width="22" height="22"
+          fill="#f59e0b" opacity="0.55" rx="1"/>
+    <rect x="234" y="48" width="22" height="22"
+          fill="#f59e0b" opacity="0.55" rx="1"/>
+    <rect x="212" y="92" width="22" height="22"
+          fill="#1c1204" opacity="0.75" rx="1"/>
+
+    <!-- HORIZONTAL SPEED LINES -->
+    <line x1="40" y1="36" x2="136" y2="36"
+          stroke="#fbbf24" stroke-width="5.5" stroke-linecap="round" opacity="0.80"/>
+    <line x1="52" y1="52" x2="124" y2="52"
+          stroke="#f59e0b" stroke-width="4"   stroke-linecap="round" opacity="0.60"/>
+    <line x1="62" y1="65" x2="112" y2="65"
+          stroke="#fbbf24" stroke-width="3"   stroke-linecap="round" opacity="0.42"/>
+  </g>
+
+  <!-- RIM LIGHT -->
+  <rect x="12" y="12" width="376" height="376" rx="48"
+        fill="none" stroke="url(#js-primary)" stroke-width="1"
+        opacity="0.42"/>
+
+  <!-- ── WORDMARK: JETSTREAM ── -->
+  <text font-family="'Arial Black','Bahnschrift',Arial,sans-serif"
+        font-size="58" font-weight="900" letter-spacing="-2"
+        fill="white" opacity="0.95"
+        transform="translate(200,274)">
+    JET<tspan fill="#fbbf24">STREAM</tspan>
+  </text>
+
+  <text font-family="'Arial Black',Arial,sans-serif"
+        font-size="37" font-weight="900" letter-spacing="6"
+        fill="#fbbf24" opacity="0.68"
+        transform="translate(200,312)">
+    OPS<tspan dx="7" fill="#1c1204">_</tspan>SUITE
+  </text>
+
+  <!-- TAGLINE -->
+  <text x="200" y="347" text-anchor="middle"
+        font-family="'Courier New',monospace"
+        font-size="9.5" letter-spacing="5.5"
+        fill="#f59e0b" opacity="0.57">
+    // DRAWRING · SALES · SETTLE
+  </text>
+</svg>

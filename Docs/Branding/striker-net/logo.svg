@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <!-- Violet → magenta gradient -->
+    <linearGradient id="sk-g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#a78bfa" stop-opacity="0.90"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.90"/>
+    </linearGradient>
+    <!-- Cyan → green accent -->
+    <linearGradient id="sk-g2" x1="40%" y1="0%" x2="60%" y2="100%">
+      <stop offset="0%"   stop-color="#22d3ee" stop-opacity="0.82"/>
+      <stop offset="100%" stop-color="#10b981" stop-opacity="0.62"/>
+    </linearGradient>
+    <!-- Node glow -->
+    <filter id="sk-neglow" x="-60%" y="-30%" width="220%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- Edge glow -->
+    <filter id="sk-edgeglow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- BACKGROUND -->
+  <rect width="400" height="400" rx="56" fill="#070b1a"/>
+
+  <!-- TRANSITION SWEEP (deep-slate to black) -->
+  <polygon points="0,120 320,0 400,0 0,240"
+           fill="#090f2a" opacity="0.65"/>
+  <polygon points="0,240 400,0 400,160 120,260"
+           fill="#050a16" opacity="0.50"/>
+
+  <!-- BACKGROUND DOT-MESH (faint terminal grid) -->
+  <g fill="#4f8ef7" opacity="0.04">
+    <circle cx="60"  cy="60"  r="2"/><circle cx="80"  cy="60"  r="2"/>
+    <circle cx="100" cy="60"  r="2"/><circle cx="60"  cy="80"  r="2"/>
+    <circle cx="80"  cy="80"  r="2"/><circle cx="100" cy="80"  r="2"/>
+    <circle cx="260" cy="200" r="2"/><circle cx="280" cy="200" r="2"/>
+    <circle cx="300" cy="200" r="2"/><circle cx="260" cy="220" r="2"/>
+    <circle cx="280" cy="220" r="2"/><circle cx="300" cy="220" r="2"/>
+    <circle cx="320" cy="200" r="2"/><circle cx="340" cy="200" r="2"/>
+    <circle cx="360" cy="200" r="2"/><circle cx="320" cy="220" r="2"/>
+    <circle cx="340" cy="220" r="2"/><circle cx="360" cy="220" r="2"/>
+    <circle cx="60"  cy="260" r="2"/><circle cx="80"  cy="260" r="2"/>
+    <circle cx="100" cy="260" r="2"/><circle cx="60"  cy="280" r="2"/>
+    <circle cx="80"  cy="280" r="2"/><circle cx="100" cy="280" r="2"/>
+  </g>
+
+  <!-- RED "S" CENTRAL GLOW HALO -->
+  <circle cx="200" cy="200" r="108"
+          fill="url(#sk-neglow)" opacity="0.08"/>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!--   CONNECTED NETWORK DIAGRAM MARK          -->
+  <!-- ══════════════════════════════════════════ -->
+
+  <!-- NODE CENTER CORE -->
+  <circle cx="200" cy="200" r="20"
+          fill="#a78bfa" opacity="0.25" filter="url(#sk-neglow)"/>
+
+  <!-- CENTER ICON: STRIKER SHIELD (square on point = S) -->
+  <g transform="translate(200,200)">
+    <!-- Shield body -->
+    <polygon points="0,-34 28,-6 28,10 0,34 -28,10 -28,-6"
+             fill="url(#sk-g1)" opacity="0.78" filter="url(#sk-neglow)"/>
+    <!-- Diagonal accent bar inside shield -->
+    <line x1="-30" y1="10" x2="28" y2="-10"
+          stroke="#22d3ee" stroke-width="4"
+          stroke-linecap="round" opacity="0.82" filter="url(#sk-neglow)"/>
+    <!-- Center impact dot -->
+    <circle cx="0" cy="0" r="4" fill="white" opacity="0.92"/>
+  </g>
+
+  <!-- CONNECTION LINES (edges from center to satellite nodes) -->
+  <line x1="200" y1="200" x2="120" y2="90"
+        stroke="#22d3ee" stroke-width="1.4" opacity="0.30"/>
+  <line x1="200" y1="200" x2="276" y2="96"
+        stroke="#22d3ee" stroke-width="1.4" opacity="0.30"/>
+  <line x1="200" y1="200" x2="96"  y2="270"
+        stroke="#22d3ee" stroke-width="1.4" opacity="0.30"/>
+  <line x1="200" y1="200" x2="296" y2="274"
+        stroke="#22d3ee" stroke-width="1.4" opacity="0.30"/>
+  <line x1="200" y1="200" x2="286" y2="184"
+        stroke="#22d3ee" stroke-width="1.4" opacity="0.26"/>
+  <line x1="200" y1="200" x2="114" y2="178"
+        stroke="#22d3ee" stroke-width="1.4" opacity="0.26"/>
+
+  <!-- SATELLITE NODES ── AGENT / MASTER DEALER / DRAW -->
+  <g filter="url(#sk-neglow)">
+    <!-- Node 1: AGENT      (top-left) -->
+    <circle cx="120" cy="90"  r="14" fill="#22d3ee" opacity="0.80"/>
+    <text text-anchor="middle" dominant-baseline="central"
+          font-family="monospace" font-size="8" fill="#070b1a"
+          font-weight="700">A</text>
+
+    <!-- Node 2: MD         (top-right) -->
+    <circle cx="276" cy="96"  r="14" fill="#10b981" opacity="0.80"/>
+    <text text-anchor="middle" dominant-baseline="central"
+          font-family="monospace" font-size="8" fill="#070b1a"
+          font-weight="700">MD</text>
+
+    <!-- Node 3: DRAW       (bottom-right) -->
+    <circle cx="296" cy="274" r="14" fill="#a78bfa" opacity="0.80"/>
+    <text text-anchor="middle" dominant-baseline="central"
+          font-family="monospace" font-size="8" fill="#070b1a"
+          font-weight="700">D</text>
+
+    <!-- Node 4: SALES      (bottom-left) -->
+    <circle cx="96"  cy="270" r="14" fill="#f59e0b" opacity="0.80"/>
+    <text text-anchor="middle" dominant-baseline="central"
+          font-family="monospace" font-size="8" fill="#070b1a"
+          font-weight="700">S</text>
+
+    <!-- Node 5: RISK       (right) -->
+    <circle cx="286" cy="184" r="12" fill="#34d399" opacity="0.72"/>
+    <text text-anchor="middle" dominant-baseline="central"
+          font-family="monospace" font-size="7.5" fill="#070b1a"
+          font-weight="700">R</text>
+
+    <!-- Node 6: SETTLE     (left) -->
+    <circle cx="114" cy="178" r="12" fill="#818cf8" opacity="0.72"/>
+    <text text-anchor="middle" dominant-baseline="central"
+          font-family="monospace" font-size="7.5" fill="#070b1a"
+          font-weight="700">X</text>
+  </g>
+
+  <!-- CONNECTION NODE PULSE hinterland -->
+  <circle cx="200" cy="200" r="20" fill="#7c3aed" opacity="0.15"
+          filter="url(#sk-neglow)"/>
+
+  <!-- RIM LIGHT -->
+  <rect x="12" y="12" width="376" height="376" rx="48"
+        fill="none" stroke="url(#sk-g1)" stroke-width="1"
+        opacity="0.32"/>
+
+  <!-- ── WORDMARK: STRIKER.NET ── -->
+  <text font-family="'Arial Black','Bahnschrift',Arial,sans-serif"
+        font-size="62" font-weight="900" letter-spacing="-2.5"
+        fill="white" opacity="0.95"
+        transform="translate(200,300)">
+    STRIKER<tspan dx="15" fill="#a78bfa" font-weight="400">.NET</tspan>
+  </text>
+
+  <text x="56" y="327"
+        font-family="'Bahnschrift','Segoe UI',Arial,sans-serif"
+        font-size="9.5" letter-spacing="7"
+        fill="#22d3ee" opacity="0.60">
+    BETTING INTELLIGENCE · NETWORK COMMAND
+  </text>
+</svg>
